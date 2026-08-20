@@ -389,15 +389,54 @@ class SentimentAnalyzer:
 # 5. SIGNAL GENERATOR
 # ──────────────────────────────────────────────────────────────
 
+def query_gemini_api(prompt: str, system_instruction: str = "") -> str:
+    """Query Gemini API via HTTP REST using GEMINI_API_KEY from environment or .env file."""
+    import os
+    import json
+    import urllib.request as _ur
+
+    api_key = os.getenv('GEMINI_API_KEY', '')
+    if not api_key and os.path.exists('.env'):
+        try:
+            with open('.env') as f:
+                for line in f:
+                    if line.startswith('GEMINI_API_KEY='):
+                        api_key = line.split('=', 1)[1].strip()
+        except Exception:
+            pass
+
+    if not api_key:
+        return ""
+
+    models = ['gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-2.0-flash']
+    for m in models:
+        url = f'https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={api_key}'
+        body = {
+            'contents': [{'role': 'user', 'parts': [{'text': prompt}]}],
+            'generationConfig': {'temperature': 0.7, 'maxOutputTokens': 1024}
+        }
+        if system_instruction:
+            body['system_instruction'] = {'parts': [{'text': system_instruction}]}
+
+        try:
+            req = _ur.Request(url, data=json.dumps(body).encode('utf-8'), headers={'Content-Type': 'application/json'}, method='POST')
+            with _ur.urlopen(req, timeout=8) as resp:
+                res = json.loads(resp.read().decode('utf-8'))
+                text = res['candidates'][0]['content']['parts'][0]['text'].strip()
+                if text:
+                    return text
+        except Exception:
+            continue
+    return ""
+
+
 def generate_signal_llm(prices, mid, bids_l2, asks_l2, news_items, fundamentals=None):
     """
-    LLM-powered signal generator using Ollama (deepseek-r1).
-    Computes technical indicators to build a structured prompt, sends it to the
-    local Ollama server, and parses a JSON response: {signal, confidence, target, headline}.
-    Falls back to technical scoring if Ollama is unavailable or times out.
+    LLM-powered signal generator using Gemini / technical engine.
+    Computes technical indicators to build a structured prompt.
     Returns (signal: str, confidence: float, target: float, headline: str)
     """
-    # Compute technical indicators regardless (used in both LLM prompt and fallback)
+    fund = fundamentals or {}
     rsi   = TechnicalIndicators.rsi(prices)
     macd_, sig_, _ = TechnicalIndicators.macd(prices)
     bb_mid, bb_upper, bb_lower = TechnicalIndicators.bollinger_bands(prices)
@@ -405,27 +444,9 @@ def generate_signal_llm(prices, mid, bids_l2, asks_l2, news_items, fundamentals=
     stoch = TechnicalIndicators.stochastic(prices)
     obi   = TechnicalIndicators.order_book_imbalance(bids_l2, asks_l2)
 
-    # Non-local reference to outer prices
-    eval_prices = list(prices)
-    if mid > 0 and len(eval_prices) < 5:
-        eval_prices = [mid * 0.995, mid * 0.998, mid * 1.001, mid * 0.999, mid]
-
     def _technical_fallback():
-        """Fallback: weighted rule-based scoring (original algorithm)."""
         if mid <= 0:
             return 'HOLD', 60.0, 0.0, 'Initializing market telemetry feed...'
-
-        local_rsi   = TechnicalIndicators.rsi(eval_prices)
-        local_macd, local_sig, _ = TechnicalIndicators.macd(eval_prices)
-        local_mid, local_upper, local_lower = TechnicalIndicators.bollinger_bands(eval_prices)
-        local_mom   = TechnicalIndicators.momentum(eval_prices)
-        local_stoch = TechnicalIndicators.stochastic(eval_prices)
-        local_obi   = TechnicalIndicators.order_book_imbalance(bids_l2, asks_l2)
-
-        score = 0.0
-        if local_rsi < 30:     score += 2.5
-        elif local_rsi < 42:   score += 1.0
-        elif local_rsi > 75:   score -= 2.5
         signal = 'HOLD'
         confidence = 65.0
         if rsi < 35 and macd_ > sig_ and obi > 0:
