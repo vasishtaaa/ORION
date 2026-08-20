@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -59,88 +60,55 @@ export default function LandingPage() {
   const { status, snapshot } = useVortexSocket();
 
   return (
-    <div className="min-h-screen relative flex flex-col gap-6" style={{ background: '#000e07' }}>
+    <div className="min-h-screen relative flex flex-col gap-8 w-full" style={{ background: '#000e07' }}>
       <AppHeader wsStatus={status} activeTicker={snapshot?.ticker} currentPath="/" />
 
-      {/* Background Ambient Glow */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[rgba(0,255,135,0.06)] rounded-full blur-[140px]" />
-        <div className="absolute top-[50%] left-[20%] w-[400px] h-[400px] bg-[rgba(80,200,120,0.04)] rounded-full blur-[120px]" />
-      </div>
-
       {/* Story Scroll Sections */}
-      <div className="relative z-10 flex flex-col gap-12">
+      <div className="relative z-10 flex flex-col gap-12 w-full">
         {STORY_SECTIONS.map((section, i) => (
           <section
             key={i}
-            className="relative min-h-[75vh] flex items-center justify-center p-6"
-            style={{ scrollSnapAlign: 'start' }}
+            className="relative min-h-[70vh] flex items-center justify-center py-8 w-full"
           >
             <motion.div
               className="p-6 md:p-10 rounded-2xl border bg-[#000e07]/90 backdrop-blur-xl border-[rgba(80,200,120,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden max-w-4xl w-full text-center flex flex-col items-center gap-6"
-              initial={{ opacity: 0, y: 48, scale: 0.96 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: false, margin: '-80px' }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0.85, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             >
-              <motion.p
-                className="font-mono text-xs font-bold tracking-[4px] text-[var(--matrix)]"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
+              <p className="font-mono text-xs font-bold tracking-[4px] text-[var(--matrix)]">
                 {section.tag}
-              </motion.p>
+              </p>
 
               {section.isHero ? (
                 <>
-                  <motion.h1
+                  <h1
                     className="font-sans font-black tracking-[8px] uppercase text-[var(--matrix-bright)]"
-                    style={{ fontSize: 'clamp(48px, 8vw, 96px)', lineHeight: 1, textShadow: '0 0 60px rgba(0,255,135,0.4)' }}
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ fontSize: 'clamp(44px, 7vw, 92px)', lineHeight: 1.05, textShadow: '0 0 50px rgba(0,255,135,0.4)' }}
                   >
                     {section.heading}
-                  </motion.h1>
-                  <motion.p
-                    className="font-mono text-xs font-semibold tracking-widest text-[var(--matrix)] text-center"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
+                  </h1>
+                  <p className="font-mono text-xs font-semibold tracking-widest text-[var(--matrix)] text-center">
                     {section.sub}
-                  </motion.p>
+                  </p>
                 </>
               ) : (
-                <motion.h2
+                <h2
                   className="font-sans font-black tracking-wider uppercase text-center"
-                  style={{ fontSize: 'clamp(32px, 5vw, 64px)', lineHeight: 1.1, background: 'linear-gradient(135deg, #e8fff4 0%, #50C878 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
+                  style={{ fontSize: 'clamp(28px, 4.5vw, 56px)', lineHeight: 1.15, background: 'linear-gradient(135deg, #e8fff4 0%, #50C878 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
                 >
                   {section.heading}
-                </motion.h2>
+                </h2>
               )}
 
-              <motion.p
-                className="font-mono text-xs font-semibold leading-relaxed max-w-2xl mx-auto text-[var(--text-secondary)] text-center"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.35 }}
-              >
+              <p className="font-mono text-xs font-semibold leading-relaxed max-w-2xl mx-auto text-[var(--text-secondary)] text-center">
                 {section.desc}
-              </motion.p>
+              </p>
 
               {/* CTA buttons on hero */}
               {section.isHero && (
-                <motion.div
-                  className="flex flex-wrap gap-6 justify-center items-center pt-4"
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45 }}
-                >
+                <div className="flex flex-wrap gap-4 md:gap-6 justify-center items-center pt-4">
                   <Link href="/terminal" className="no-underline inline-flex flex-shrink-0">
                     <motion.button
                       className="glass-pill cursor-pointer font-bold text-xs tracking-wider"
@@ -170,33 +138,23 @@ export default function LandingPage() {
                       🎯 SCREENER
                     </motion.button>
                   </Link>
-                </motion.div>
+                </div>
               )}
 
               {/* Scroll prompt on hero */}
               {i === 0 && (
-                <motion.div
-                  className="pt-6 flex flex-col items-center gap-2"
-                  animate={{ y: [0, 8, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+                <div className="pt-4 flex flex-col items-center gap-2 animate-bounce">
                   <p className="font-mono text-[10px] tracking-widest text-[var(--text-muted)]">SCROLL TO EXPLORE</p>
                   <span className="text-[var(--matrix)] text-sm">↓</span>
-                </motion.div>
+                </div>
               )}
             </motion.div>
           </section>
         ))}
 
-        {/* Features Grid with Animated Viewports */}
-        <section className="relative flex flex-col items-center justify-center p-6 gap-6">
-          <motion.div
-            className="p-6 md:p-10 rounded-2xl border bg-[#000e07]/90 backdrop-blur-xl border-[rgba(80,200,120,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden max-w-6xl w-full flex flex-col items-center gap-8 text-center"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, margin: '-60px' }}
-            transition={{ duration: 0.7 }}
-          >
+        {/* Features Grid */}
+        <section className="relative flex flex-col items-center justify-center py-8 gap-6 w-full">
+          <div className="p-6 md:p-10 rounded-2xl border bg-[#000e07]/90 backdrop-blur-xl border-[rgba(80,200,120,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden max-w-6xl w-full flex flex-col items-center gap-8 text-center">
             <div>
               <p className="font-mono text-xs font-bold tracking-[4px] text-[var(--matrix)]">05 / CORE CAPABILITIES</p>
               <h2 className="font-sans text-3xl font-black tracking-wider uppercase mt-2" style={{ background: 'linear-gradient(135deg, #e8fff4, #50C878)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -209,10 +167,6 @@ export default function LandingPage() {
                 <motion.div
                   key={i}
                   className="glass-sm rounded-xl p-6 overflow-hidden flex flex-col gap-4 text-left border border-[rgba(80,200,120,0.15)]"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false }}
-                  transition={{ duration: 0.5, delay: i * 0.15 }}
                   whileHover={{ y: -6, borderColor: 'rgba(80,200,120,0.4)', boxShadow: '0 12px 30px rgba(0,255,135,0.15)' }}
                 >
                   <div className="text-4xl">{f.icon}</div>
@@ -227,12 +181,7 @@ export default function LandingPage() {
             </div>
 
             {/* Launch CTA */}
-            <motion.div
-              className="pt-8 border-t border-[rgba(80,200,120,0.15)] w-full flex flex-col items-center gap-4"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
+            <div className="pt-8 border-t border-[rgba(80,200,120,0.15)] w-full flex flex-col items-center gap-4">
               <p className="font-mono text-xs font-bold tracking-[4px] text-[var(--matrix)]">06 / LAUNCH SYSTEM</p>
               <h2 className="font-sans text-2xl font-black tracking-wider uppercase text-[var(--text-primary)]">Ready For Market Execution</h2>
               <p className="font-mono text-xs font-semibold text-[var(--text-secondary)]">Access the real-time command desk, market screener, or quantitative analyst.</p>
@@ -257,8 +206,8 @@ export default function LandingPage() {
                   </motion.button>
                 </Link>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </section>
       </div>
     </div>

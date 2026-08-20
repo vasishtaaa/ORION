@@ -18,11 +18,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body style={{ background: "#000e07", minHeight: "100vh", display: "flex", flexDirection: "column" }} className="overflow-x-hidden">
+      <body style={{ background: "#000e07", minHeight: "100vh" }} className="text-[var(--text-primary)] font-sans antialiased overflow-x-hidden">
         <ClientBackgroundWrapper />
-        <div className="flex-1 flex flex-col w-full max-w-[1600px] mx-auto p-6 min-h-0 overflow-hidden gap-6">
+        <main className="w-full max-w-[1600px] mx-auto p-4 md:p-6 min-h-screen flex flex-col gap-6">
           {children}
-        </div>
+        </main>
       </body>
     </html>
   );
