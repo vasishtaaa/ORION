@@ -1,0 +1,10 @@
+{
+  "name": "vortex-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix vortex-ui run dev",
+    "build": "npm --prefix vortex-ui install && npm --prefix vortex-ui run build",
+    "start": "npm --prefix vortex-ui run start"
+  }
+}

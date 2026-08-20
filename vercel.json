@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd vortex-ui && npm install && npm run build",
+  "outputDirectory": "vortex-ui/.next",
+  "framework": "nextjs"
+}
