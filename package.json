@@ -1,10 +1,13 @@
 {
-  "name": "vortex-root",
+  "name": "vortex",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "vortex-ui"
+  ],
   "scripts": {
-    "dev": "npm --prefix vortex-ui run dev",
-    "build": "npm --prefix vortex-ui install && npm --prefix vortex-ui run build",
-    "start": "npm --prefix vortex-ui run start"
+    "build": "npm --workspace=vortex-ui run build",
+    "dev": "npm --workspace=vortex-ui run dev",
+    "start": "npm --workspace=vortex-ui run start"
   }
 }
