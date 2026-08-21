@@ -76,10 +76,10 @@ export default function AppHeader({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 w-full backdrop-blur-md bg-black/60 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)]">
+      <header className="fixed top-0 left-0 right-0 z-40 w-full backdrop-blur-md bg-black/60 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] flex justify-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-4 lg:gap-6">
+          {/* Left: Logo & Brand */}
+          <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 no-underline group flex-shrink-0">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#00ff87] to-[#006b3a] flex items-center justify-center font-black text-black text-sm sm:text-base shadow-[0_0_20px_rgba(0,255,135,0.4)] group-hover:scale-105 transition-transform">
                 V
@@ -98,9 +98,11 @@ export default function AppHeader({
                 </span>
               </div>
             </Link>
+          </div>
 
-            {/* Desktop Navigation Tabs (>= 1024px) */}
-            <nav className="hidden lg:flex items-center gap-1 pl-4 border-l border-white/10">
+          {/* Center: Navigation Links + Search Bar (Desktop) */}
+          <div className="hidden lg:flex items-center gap-4 flex-1 justify-center max-w-2xl mx-auto">
+            <nav className="flex items-center gap-1">
               {NAV_LINKS.map((link) => {
                 const isActive = currentPath === link.href;
                 return (
@@ -123,18 +125,15 @@ export default function AppHeader({
                 );
               })}
             </nav>
-          </div>
 
-          {/* Center Search Combobox Trigger (Desktop) */}
-          <div className="hidden lg:flex items-center flex-1 max-w-xs mx-4">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group"
+              className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group w-48"
             >
               <div className="flex items-center gap-2 truncate">
                 <Search className="w-3.5 h-3.5 text-[var(--matrix)] group-hover:text-[#00ff87]" />
-                <span className="truncate">Search ticker (e.g. TCS, RELIANCE)...</span>
+                <span className="truncate">Search...</span>
               </div>
               <kbd className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] text-[#00ff87] font-mono">
                 ⌘K
@@ -142,8 +141,8 @@ export default function AppHeader({
             </button>
           </div>
 
-          {/* Right Action Controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right: Stream Controls & Status */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {/* Search Icon button on Mobile & Tablet */}
             <button
               type="button"

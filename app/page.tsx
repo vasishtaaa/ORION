@@ -39,7 +39,7 @@ export default function LandingPage() {
   const { status, snapshot, activeTicker, selectTicker, timeframe, subscribe } = useVortexSocket();
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col items-center">
       <AppHeader
         wsStatus={status}
         activeTicker={activeTicker}
@@ -47,10 +47,10 @@ export default function LandingPage() {
         onTickerSelect={(t) => selectTicker(t)}
       />
 
-      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col">
+      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col items-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-10 sm:gap-16 pb-16">
           {/* Hero Section */}
-          <section className="text-center flex flex-col items-center gap-5 sm:gap-6 max-w-4xl mx-auto pt-4 sm:pt-8">
+          <section className="text-center flex flex-col items-center gap-5 sm:gap-6 max-w-4xl mx-auto pt-4 sm:pt-8 w-full">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(80,200,120,0.12)] border border-[rgba(80,200,120,0.3)] text-[11px] sm:text-xs font-mono text-[#00ff87] font-bold shadow-[0_0_20px_rgba(0,255,135,0.15)]">
               <Sparkles className="w-3.5 h-3.5" />
               <span>VORTEX HIGH-FREQUENCY TELEMETRY ENGINE 4.0</span>
@@ -70,12 +70,12 @@ export default function LandingPage() {
               </span>
             </h1>
 
-            <p className="font-mono text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+            <p className="font-mono text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed mx-auto">
               Institutional-grade order book analytics, multi-layer volumetric charting, and quantitative market reasoning powered by Gemini 3.6 Flash. Built for quantitative traders and market analysts.
             </p>
 
             {/* Action CTAs */}
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-1 sm:pt-2 w-full max-w-md">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-1 sm:pt-2 w-full max-w-md mx-auto">
               <Link href="/terminal" className="flex-1 min-w-[140px]">
                 <Button variant="primary" size="lg" className="w-full" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Launch Terminal
@@ -90,8 +90,8 @@ export default function LandingPage() {
           </section>
 
           {/* Live Interactive Product Sandbox Preview */}
-          <section className="flex flex-col gap-5 sm:gap-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <section className="flex flex-col gap-5 sm:gap-6 w-full">
+            <div className="flex flex-wrap items-center justify-between gap-3 w-full">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#00ff87] animate-pulse" />
@@ -106,8 +106,8 @@ export default function LandingPage() {
               <SignalBadge signal={snapshot?.signal || 'BUY'} />
             </div>
 
-            {/* Adaptive 4-Metric Grid: 2x2 on Mobile, 4-col on Tablet & Desktop */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
+            {/* Adaptive 4-Metric Grid */}
+            <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
               <MetricCard
                 title={`${activeTicker.split('_')[0]} Price`}
                 value={`₹${(snapshot?.mid || 2500).toFixed(2)}`}
@@ -135,10 +135,10 @@ export default function LandingPage() {
               />
             </div>
 
-            {/* Responsive CSS Grid: 1-col on Mobile/Tablet (<1024px), 12-col (8+4) on Desktop (>=1024px) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Responsive CSS Grid: Spans full width of max-w-7xl */}
+            <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Candlestick Chart (Spans 8 cols on Desktop) */}
-              <div className="lg:col-span-8 rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+              <div className="w-full lg:col-span-8 rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
                 <CandlestickChart
                   candles={snapshot?.candles || []}
                   activeTicker={activeTicker}
@@ -147,8 +147,8 @@ export default function LandingPage() {
                 />
               </div>
 
-              {/* Level 2 Order Book (Spans 4 cols on Desktop, Stacks underneath on Mobile/Tablet) */}
-              <div className="lg:col-span-4 rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] h-full">
+              {/* Level 2 Order Book (Spans 4 cols on Desktop) */}
+              <div className="w-full lg:col-span-4 rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] h-full">
                 <div>
                   <h4 className="text-xs font-mono font-bold text-[var(--matrix-bright)] uppercase mb-3 flex items-center justify-between">
                     <span>Level 2 Order Book Depth</span>
@@ -171,7 +171,7 @@ export default function LandingPage() {
             </div>
 
             {/* Quick Preset Selector */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#0e131d]/80 border border-white/10">
+            <div className="w-full p-4 sm:p-5 rounded-2xl bg-[#0e131d]/80 border border-white/10">
               <PresetSelector
                 activeTicker={activeTicker}
                 onSelectTicker={(t) => selectTicker(t)}
@@ -179,9 +179,9 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* Core Capabilities Features Grid (Equal heights & aligned footer metrics) */}
-          <section className="flex flex-col gap-6 pt-4 sm:pt-6">
-            <div className="text-center max-w-2xl mx-auto">
+          {/* Core Capabilities Features Grid */}
+          <section className="flex flex-col gap-6 pt-4 sm:pt-6 w-full">
+            <div className="text-center max-w-2xl mx-auto w-full">
               <span className="text-xs font-mono font-bold tracking-[3px] text-[var(--matrix)] uppercase">
                 Core Platform Modules
               </span>
@@ -190,7 +190,7 @@ export default function LandingPage() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-stretch">
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-stretch">
               {FEATURES.map((f, i) => (
                 <div
                   key={i}

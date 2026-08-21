@@ -43,7 +43,7 @@ export default function NewsPage() {
   const bearishCount = news.filter((n) => (n.sentiment || 0) < -0.1).length;
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col items-center">
       <AppHeader
         wsStatus={status}
         activeTicker={activeTicker}
@@ -51,10 +51,10 @@ export default function NewsPage() {
         onTickerSelect={(t) => selectTicker(t)}
       />
 
-      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col">
+      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col items-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6 pb-16">
           {/* Header & KPI Summary Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="Total Wire Feeds"
               value={news.length || 81}
@@ -82,7 +82,7 @@ export default function NewsPage() {
           </div>
 
           {/* Controls Toolbar */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#0e131d]/90 border border-white/10 flex flex-wrap items-center justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+          <div className="w-full p-4 sm:p-5 rounded-2xl bg-[#0e131d]/90 border border-white/10 flex flex-wrap items-center justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
             <div className="flex flex-col">
               <h1 className="text-base sm:text-xl font-mono font-bold text-white tracking-wider flex items-center gap-2">
                 FINANCIAL INTELLIGENCE WIRE
@@ -110,7 +110,7 @@ export default function NewsPage() {
           </div>
 
           {/* News Stream Feed Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredNews.map((item, i) => {
               const sentiment = item.sentiment || 0;
               const isBull = sentiment > 0.1;
@@ -120,7 +120,7 @@ export default function NewsPage() {
                 <GlassCard
                   key={i}
                   hoverEffect
-                  className="p-4 sm:p-5 flex flex-col justify-between gap-3 shadow-[0_6px_24px_rgba(0,0,0,0.4)] bg-[#0e131d]/85"
+                  className="p-4 sm:p-5 flex flex-col justify-between gap-3 shadow-[0_6px_24px_rgba(0,0,0,0.4)] bg-[#0e131d]/85 w-full"
                 >
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">

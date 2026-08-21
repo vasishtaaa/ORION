@@ -63,7 +63,7 @@ export default function ScreenerPage() {
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col items-center">
       <AppHeader
         wsStatus={status}
         activeTicker={activeTicker}
@@ -71,10 +71,10 @@ export default function ScreenerPage() {
         onTickerSelect={(t) => selectTicker(t)}
       />
 
-      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col">
+      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col items-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6 pb-16">
           {/* Header & Controls Toolbar */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
+          <div className="w-full p-4 sm:p-5 rounded-2xl bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-col">
               <h1 className="text-base sm:text-xl font-mono font-bold text-white tracking-wider flex items-center gap-2">
                 REAL-TIME MARKET SCREENER
@@ -113,7 +113,7 @@ export default function ScreenerPage() {
           </div>
 
           {/* Filter Presets Pill Switcher */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          <div className="w-full flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
             <Filter className="w-3.5 h-3.5 text-[var(--matrix)] flex-shrink-0" />
             {[
               { label: 'All Equities', val: 'ALL' },
@@ -137,7 +137,7 @@ export default function ScreenerPage() {
           </div>
 
           {/* Screener Data Table */}
-          <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-0 overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
+          <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-0 overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
             <div className="overflow-x-auto">
               <table className="w-full text-left font-mono text-xs">
                 <thead className="bg-black/40 border-b border-white/10 text-[var(--text-muted)] uppercase text-[10px] tracking-wider">

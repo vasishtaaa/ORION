@@ -1,10 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import AppHeader from '@/components/layout/AppHeader';
 import { useVortexSocket } from '@/lib/websocket';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { SignalBadge } from '@/components/ui/Badges';
-import { GlassCard } from '@/components/ui/GlassCard';
 import CandlestickChart from '@/components/charts/CandlestickChart';
 import OrderBookDepth from '@/components/charts/OrderBookDepth';
 import IndicatorSubChart from '@/components/charts/IndicatorSubChart';
@@ -23,7 +22,7 @@ export default function TerminalPage() {
   const currentPrice = snapshot?.mid || 2500;
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col items-center">
       <AppHeader
         wsStatus={status}
         activeTicker={activeTicker}
@@ -31,10 +30,10 @@ export default function TerminalPage() {
         onTickerSelect={(t) => selectTicker(t)}
       />
 
-      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col">
+      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col items-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6 pb-16">
           {/* Terminal Header & Quick Actions Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 p-4 rounded-2xl bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+          <div className="w-full flex flex-wrap items-center justify-between gap-3 sm:gap-4 p-4 rounded-2xl bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
@@ -71,7 +70,7 @@ export default function TerminalPage() {
           </div>
 
           {/* Primary KPI Metric Summary Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="Last Price"
               value={`₹${currentPrice.toFixed(2)}`}
@@ -101,10 +100,10 @@ export default function TerminalPage() {
           </div>
 
           {/* Main Workspace Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Main Chart Column (8 cols on Desktop) */}
-            <div className="lg:col-span-8 flex flex-col gap-6 w-full min-w-0">
-              <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+            <div className="w-full lg:col-span-8 flex flex-col gap-6 min-w-0">
+              <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
                 <CandlestickChart
                   candles={snapshot?.candles || []}
                   activeTicker={activeTicker}
@@ -114,20 +113,20 @@ export default function TerminalPage() {
               </div>
 
               {/* RSI Sub-Chart Indicator Panel */}
-              <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4">
+              <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4">
                 <IndicatorSubChart candles={snapshot?.candles || []} />
               </div>
 
               {/* Risk & Position Sizing Calculator */}
-              <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5">
+              <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5">
                 <TradeCalculator currentPrice={currentPrice} activeTicker={activeTicker} />
               </div>
             </div>
 
             {/* Right Analytical Column (4 cols on Desktop) */}
-            <div className="lg:col-span-4 flex flex-col gap-6 w-full min-w-0">
+            <div className="w-full lg:col-span-4 flex flex-col gap-6 min-w-0">
               {/* Level 2 Order Book Depth */}
-              <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5">
+              <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5">
                 <h3 className="text-xs font-mono font-bold text-[var(--matrix-bright)] uppercase mb-3 flex items-center justify-between">
                   <span>Order Book Imbalance</span>
                   <span className="text-[10px] text-[var(--text-muted)] font-normal">Level 2 Quotes</span>
@@ -140,7 +139,7 @@ export default function TerminalPage() {
               </div>
 
               {/* Fundamentals Overview Card */}
-              <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 flex flex-col gap-3 font-mono text-xs">
+              <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5 flex flex-col gap-3 font-mono text-xs">
                 <h3 className="font-bold text-[var(--matrix-bright)] uppercase border-b border-white/10 pb-2">
                   Fundamental Intelligence
                 </h3>
@@ -163,14 +162,14 @@ export default function TerminalPage() {
               </div>
 
               {/* Model Hyperparameter Tuners */}
-              <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5">
+              <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-4 sm:p-5">
                 <ParameterControls />
               </div>
             </div>
           </div>
 
           {/* Preset Market Baskets Selector Footer */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#0e131d]/80 border border-white/10">
+          <div className="w-full p-4 sm:p-5 rounded-2xl bg-[#0e131d]/80 border border-white/10">
             <PresetSelector activeTicker={activeTicker} onSelectTicker={(t) => selectTicker(t)} />
           </div>
         </div>

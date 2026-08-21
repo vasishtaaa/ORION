@@ -22,12 +22,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body
-        className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white font-sans antialiased selection:bg-[#00ff87] selection:text-black flex flex-col"
+        className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white font-sans antialiased selection:bg-[#00ff87] selection:text-black flex flex-col items-center"
       >
         <ToastProvider>
           <Preloader />
           <ClientBackgroundWrapper />
-          <div className="w-full flex-1 flex flex-col">
+          <div className="w-full flex-1 flex flex-col items-center">
             {children}
           </div>
         </ToastProvider>

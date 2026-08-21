@@ -15,7 +15,7 @@ export default function TelemetryPage() {
   const throughput = snapshot?.throughput || 1850;
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col items-center">
       <AppHeader
         wsStatus={status}
         activeTicker={activeTicker}
@@ -23,10 +23,10 @@ export default function TelemetryPage() {
         onTickerSelect={(t) => selectTicker(t)}
       />
 
-      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col">
+      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col items-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6 pb-16">
           {/* Header & KPI Summary Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="p50 Latency"
               value={`${p50.toFixed(0)} μs`}
@@ -54,8 +54,8 @@ export default function TelemetryPage() {
           </div>
 
           {/* Diagnostics & Server Health Breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-5 sm:p-6 flex flex-col gap-4 font-mono text-xs shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+          <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-5 sm:p-6 flex flex-col gap-4 font-mono text-xs shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <h3 className="text-xs sm:text-sm font-bold text-[var(--matrix-bright)] uppercase border-b border-white/10 pb-3 flex items-center justify-between">
                 <span>Telemetry Node Status</span>
                 <StatusBadge status={status} />
@@ -83,7 +83,7 @@ export default function TelemetryPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-5 sm:p-6 flex flex-col justify-between gap-4 font-mono text-xs shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+            <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-5 sm:p-6 flex flex-col justify-between gap-4 font-mono text-xs shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <h3 className="text-xs sm:text-sm font-bold text-[var(--matrix-bright)] uppercase border-b border-white/10 pb-3">
                 Packet Latency Histogram
               </h3>

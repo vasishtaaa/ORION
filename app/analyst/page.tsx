@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import AppHeader from '@/components/layout/AppHeader';
 import { useVortexSocket } from '@/lib/websocket';
-import { GlassCard } from '@/components/ui/GlassCard';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { SignalBadge } from '@/components/ui/Badges';
 import { Button } from '@/components/ui/Button';
@@ -120,7 +119,7 @@ export default function AnalystPage() {
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white flex flex-col items-center">
       <AppHeader
         wsStatus={status}
         activeTicker={activeTicker}
@@ -128,10 +127,10 @@ export default function AnalystPage() {
         onTickerSelect={(t) => selectTicker(t)}
       />
 
-      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col">
+      <main className="w-full flex-1 pt-20 sm:pt-24 flex flex-col items-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6 pb-16">
           {/* Header & KPI Summary Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="Model Signal"
               value={snapshot?.signal || 'BUY'}
@@ -159,7 +158,7 @@ export default function AnalystPage() {
           </div>
 
           {/* Main Chat Interface */}
-          <div className="rounded-2xl bg-[#0e131d]/90 border border-white/10 p-0 flex flex-col h-[580px] sm:h-[640px] shadow-[0_12px_40px_rgba(0,0,0,0.7)] overflow-hidden">
+          <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-0 flex flex-col h-[580px] sm:h-[640px] shadow-[0_12px_40px_rgba(0,0,0,0.7)] overflow-hidden">
             {/* Chat Header */}
             <div className="p-3.5 sm:p-4 border-b border-white/10 flex items-center justify-between bg-black/40">
               <div className="flex items-center gap-3">
