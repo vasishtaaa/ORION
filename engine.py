@@ -87,6 +87,8 @@ class TelemetryManager:
         self.pps_time = time.time()
         self.packet_count_since_reset = 0
         self.current_pps = 0.0
+        self.ws_clients = set()
+        self.ws_lock = threading.Lock()
 
         # AI Agent state variables
         self.ai_agent_status = "VORTEX_AI_ONLINE"
@@ -667,23 +669,34 @@ def start_websocket_server(port, telemetry_mgr):
 
     while True:
         time.sleep(0.05)
+        all_active_clients = []
         with clients_lock:
-            if not clients:
-                continue
-            snapshot = telemetry_mgr.get_snapshot()
-            frame_bytes = encode_ws_message(json.dumps(snapshot))
-            broken_clients = []
-            for client in clients:
-                try:
-                    client.sendall(frame_bytes)
-                except Exception:
-                    broken_clients.append(client)
-            for client in broken_clients:
+            all_active_clients.extend(list(clients))
+        if hasattr(telemetry_mgr, 'ws_lock') and hasattr(telemetry_mgr, 'ws_clients'):
+            with telemetry_mgr.ws_lock:
+                all_active_clients.extend(list(telemetry_mgr.ws_clients))
+        
+        if not all_active_clients:
+            continue
+            
+        snapshot = telemetry_mgr.get_snapshot()
+        frame_bytes = encode_ws_message(json.dumps(snapshot))
+        broken_clients = []
+        for client in all_active_clients:
+            try:
+                client.sendall(frame_bytes)
+            except Exception:
+                broken_clients.append(client)
+        for client in broken_clients:
+            with clients_lock:
                 clients.discard(client)
-                try:
-                    client.close()
-                except:
-                    pass
+            if hasattr(telemetry_mgr, 'ws_lock') and hasattr(telemetry_mgr, 'ws_clients'):
+                with telemetry_mgr.ws_lock:
+                    telemetry_mgr.ws_clients.discard(client)
+            try:
+                client.close()
+            except:
+                pass
 
 def process_chat_message(sock, text, active_ticker, telemetry_mgr):
     import json
@@ -762,6 +775,13 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
             super().__init__(*args, directory=web_dir, **kwargs)
         def log_message(self, format, *args):
             pass
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Upgrade, Sec-WebSocket-Key, Sec-WebSocket-Version')
+            self.end_headers()
+
         def do_POST(self):
             if self.path.startswith('/api/terminal/command'):
                 content_length = int(self.headers.get('Content-Length', 0))
@@ -789,13 +809,99 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 self.wfile.write(resp.encode('utf-8'))
                 return
             
-            # Block legacy static UI routes
             self.send_response(404)
             self.send_header('Content-Type', 'text/plain')
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(b"VORTEX-HF API Server. Frontend UI is offloaded to http://localhost:3000.")
+            self.wfile.write(b"Endpoint not found.")
 
         def do_GET(self):
+            # 1. Handle WebSocket Upgrade on Main HTTP Port (Cloud Single-Port Hosting)
+            if self.headers.get('Upgrade', '').lower() == 'websocket':
+                ws_key = self.headers.get('Sec-WebSocket-Key')
+                if ws_key:
+                    guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+                    accept_hash = base64.b64encode(hashlib.sha1((ws_key + guid).encode('utf-8')).digest()).decode('utf-8')
+                    handshake_reply = (
+                        "HTTP/1.1 101 Switching Protocols\r\n"
+                        "Upgrade: websocket\r\n"
+                        "Connection: Upgrade\r\n"
+                        "Sec-WebSocket-Accept: {}\r\n\r\n"
+                    ).format(accept_hash)
+                    self.connection.sendall(handshake_reply.encode('utf-8'))
+                    
+                    # Register and serve client in WebSocket loop
+                    if telemetry_mgr and hasattr(telemetry_mgr, 'ws_clients') and hasattr(telemetry_mgr, 'ws_lock'):
+                        with telemetry_mgr.ws_lock:
+                            telemetry_mgr.ws_clients.add(self.connection)
+                        try:
+                            while True:
+                                msg, opcode = read_ws_message(self.connection)
+                                if msg == "CLOSE" or msg is None:
+                                    break
+                                try:
+                                    data = json.loads(msg)
+                                    if data.get('cmd') == 'select_ticker' or data.get('action') == 'subscribe':
+                                        ticker = data.get('ticker')
+                                        if ticker:
+                                            telemetry_mgr.active_ticker = ticker
+                                    elif data.get('cmd') == 'chat' or data.get('cmd') == 'chat_message':
+                                        text = data.get('text', '')
+                                        active_ticker = data.get('activeTicker', getattr(telemetry_mgr, 'active_ticker', 'RELI_NSE'))
+                                        threading.Thread(
+                                            target=process_chat_message,
+                                            args=(self.connection, text, active_ticker, telemetry_mgr),
+                                            daemon=True
+                                        ).start()
+                                except Exception:
+                                    pass
+                        except Exception:
+                            pass
+                        finally:
+                            with telemetry_mgr.ws_lock:
+                                telemetry_mgr.ws_clients.discard(self.connection)
+                            try:
+                                self.connection.close()
+                            except:
+                                pass
+                    return
+
+            # 2. Health check / Root status endpoint
+            if self.path == '/' or self.path.startswith('/health'):
+                data = {
+                    'status': 'ONLINE',
+                    'service': 'VORTEX-HF Telemetry Engine',
+                    'version': '4.0.0',
+                    'active_ticker': getattr(telemetry_mgr, 'active_ticker', 'TCS_NSE') if telemetry_mgr else 'TCS_NSE',
+                    'tickers_tracked': len(telemetry_mgr.books) if telemetry_mgr else 0,
+                    'timestamp': time.time()
+                }
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(data).encode('utf-8'))
+                return
+
+            # 3. News Feed API
+            if self.path.startswith('/api/news'):
+                news_list = []
+                if telemetry_mgr and hasattr(telemetry_mgr, 'vortex_agent') and hasattr(telemetry_mgr.vortex_agent, 'news_scraper'):
+                    items = telemetry_mgr.vortex_agent.news_scraper.all_items()
+                    news_list = [{
+                        'headline': n.headline,
+                        'source': n.source,
+                        'ts': n.ts,
+                        'sentiment': getattr(n, 'sentiment', 0.0)
+                    } for n in items]
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(news_list).encode('utf-8'))
+                return
+
+            # 4. Terminal Command API
             if self.path.startswith('/api/terminal/command'):
                 from urllib.parse import urlparse, parse_qs
                 parsed = urlparse(self.path)
@@ -819,6 +925,7 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 self.wfile.write(resp.encode('utf-8'))
                 return
 
+            # 5. Screener API
             if self.path.startswith('/api/screener'):
                 items = []
                 if telemetry_mgr:
@@ -830,6 +937,7 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 self.wfile.write(json.dumps(items).encode('utf-8'))
                 return
 
+            # 6. Yahoo Search API
             if self.path.startswith('/api/search'):
                 from urllib.parse import urlparse, parse_qs
                 import urllib.parse
@@ -878,11 +986,12 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 self.wfile.write(json.dumps(results).encode('utf-8'))
                 return
             
-            # Block legacy static UI routes
+            # Fallback 404
             self.send_response(404)
-            self.send_header('Content-Type', 'text/plain')
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(b"VORTEX-HF API Server. Frontend UI is offloaded to http://localhost:3000.")
+            self.wfile.write(json.dumps({'error': 'Endpoint not found'}).encode('utf-8'))
 
     class SilentTCPServer(socketserver.TCPServer):
         def handle_error(self, request, client_address):
