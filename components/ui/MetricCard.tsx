@@ -28,9 +28,9 @@ export function MetricCard({
   className,
 }: MetricCardProps) {
   return (
-    <GlassCard hoverEffect className={clsx('p-4 sm:p-5 lg:p-6 flex flex-col justify-between gap-3 sm:gap-4 w-full min-w-0 bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]', className)}>
+    <GlassCard hoverEffect className={clsx('p-4 sm:p-5 flex flex-col justify-between gap-3 sm:gap-4 w-full min-w-0 bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-visible', className)}>
       <div className="flex items-center justify-between gap-2 min-w-0">
-        <span className="w-fit max-w-full inline-flex shrink-0 items-center justify-center rounded-md px-2.5 py-1 text-xs font-mono font-semibold tracking-wider text-[var(--text-secondary)] uppercase bg-black/30 border border-white/5 truncate">
+        <span className="w-fit max-w-full inline-flex shrink-0 items-center justify-center rounded-md px-3 py-1 text-xs font-mono font-semibold tracking-wider text-[var(--text-secondary)] uppercase bg-black/30 border border-white/5 truncate">
           {title}
         </span>
         {icon && <span className="text-[var(--matrix)] opacity-80 shrink-0">{icon}</span>}
@@ -38,7 +38,7 @@ export function MetricCard({
 
       <div className="flex items-baseline justify-between gap-2 flex-wrap min-w-0">
         <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0">
-          <span className="text-xl sm:text-2xl lg:text-3xl font-mono font-extrabold tracking-tight text-white truncate">
+          <span className="text-xl sm:text-2xl font-mono font-extrabold tracking-tight text-white truncate">
             {value}
           </span>
           {subValue && (

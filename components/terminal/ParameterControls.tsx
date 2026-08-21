@@ -5,7 +5,7 @@ import { DEFAULT_QUANT_PARAMS } from '@/lib/presets';
 import { Slider } from '@/components/ui/Slider';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
-import { RotateCcw, Copy, Play } from 'lucide-react';
+import { RotateCcw, Copy } from 'lucide-react';
 
 interface ParameterControlsProps {
   onParamsChange?: (params: QuantParameters) => void;
@@ -57,7 +57,7 @@ export function ParameterControls({ onParamsChange }: ParameterControlsProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Slider
-          label="RSI Lookback Period"
+          label="RSI Lookback"
           value={params.rsiPeriod}
           min={5}
           max={30}
@@ -65,7 +65,7 @@ export function ParameterControls({ onParamsChange }: ParameterControlsProps) {
           onChange={(v) => updateParam('rsiPeriod', v)}
         />
         <Slider
-          label="MACD Fast Period"
+          label="MACD Fast"
           value={params.macdFast}
           min={5}
           max={20}
@@ -73,7 +73,7 @@ export function ParameterControls({ onParamsChange }: ParameterControlsProps) {
           onChange={(v) => updateParam('macdFast', v)}
         />
         <Slider
-          label="MACD Slow Period"
+          label="MACD Slow"
           value={params.macdSlow}
           min={20}
           max={45}
@@ -90,7 +90,7 @@ export function ParameterControls({ onParamsChange }: ParameterControlsProps) {
           onChange={(v) => updateParam('riskMultiplier', v)}
         />
         <Slider
-          label="Target Profit Threshold"
+          label="Target Profit"
           value={params.targetProfitPct}
           min={1.0}
           max={10.0}

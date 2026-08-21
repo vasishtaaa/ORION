@@ -3,7 +3,7 @@
 
 :root {
   /* Institutional Palette */
-  --brg-darkest: #0a0d14;
+  --brg-darkest: #080b11;
   --brg-dark: #06090e;
   --brg-mid: #0b1510;
   --brg-bright: #006b3a;
@@ -33,7 +33,7 @@ html {
   width: 100%;
   min-height: 100%;
   scroll-behavior: smooth;
-  background: #0a0d14;
+  background: #080b11;
   color-scheme: dark;
   margin: 0;
   padding: 0;
@@ -48,7 +48,7 @@ body {
   min-height: 100dvh;
   margin: 0;
   padding: 0;
-  background: #0a0d14;
+  background: #080b11;
   color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -73,7 +73,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(10, 13, 20, 0.8);
+  background: rgba(8, 11, 17, 0.8);
 }
 
 ::-webkit-scrollbar-thumb {

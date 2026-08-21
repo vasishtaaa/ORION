@@ -31,12 +31,12 @@ export default function TerminalPage() {
       />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
-        {/* Terminal Header & Quick Actions Toolbar */}
-        <div className="w-full flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+        {/* Sub-Header Row: Active Ticker, Quick Tickers & Export Toolbar */}
+        <div className="w-full flex flex-wrap items-center justify-between gap-4 py-3 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col">
               <div className="flex items-center gap-2.5">
-                <h1 className="text-lg sm:text-2xl font-mono font-bold text-white tracking-wider">
+                <h1 className="text-xl sm:text-2xl font-mono font-bold text-white tracking-wider">
                   {activeTicker}
                 </h1>
                 <SignalBadge signal={snapshot?.signal || 'BUY'} />
@@ -47,16 +47,16 @@ export default function TerminalPage() {
             </div>
           </div>
 
-          {/* Quick Ticker Switcher Buttons */}
+          {/* Quick Tickers Bar */}
           <div className="hidden md:flex items-center gap-1.5 overflow-x-auto max-w-md">
             {QUICK_TICKERS.map((t) => (
               <button
                 key={t}
                 onClick={() => selectTicker(t)}
-                className={`px-3 py-1 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer ${
+                className={`w-fit px-3.5 py-1 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer ${
                   activeTicker === t
                     ? 'bg-[#50C878] text-black font-bold shadow-[0_0_12px_rgba(80,200,120,0.4)]'
-                    : 'bg-[#0a0d14] text-[var(--text-secondary)] hover:text-white hover:bg-white/5 border border-white/5'
+                    : 'bg-[#0e131d] text-[var(--text-secondary)] hover:text-white hover:bg-white/5 border border-white/5'
                 }`}
               >
                 {t.split('_')[0]}
@@ -71,27 +71,27 @@ export default function TerminalPage() {
         {/* Primary KPI Metric Summary Cards Grid */}
         <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
           <MetricCard
-            title="Last Price"
+            title="LAST PRICE"
             value={`₹${currentPrice.toFixed(2)}`}
             change={snapshot?.change}
             changePct={snapshot?.change_pct}
             icon={<DollarSign className="w-4 h-4" />}
           />
           <MetricCard
-            title="Target Price"
+            title="TARGET PRICE"
             value={`₹${(snapshot?.target || currentPrice * 1.035).toFixed(2)}`}
             subValue={`+${(((snapshot?.target || currentPrice * 1.035) - currentPrice) / currentPrice * 100).toFixed(1)}%`}
-            badge={<span className="w-fit px-2.5 py-0.5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-xs font-mono font-bold">{snapshot?.confidence?.toFixed(0) || 85}% Conf.</span>}
+            badge={<span className="w-fit px-3 py-0.5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-xs font-mono font-bold">{snapshot?.confidence?.toFixed(0) || 85}% Conf.</span>}
             icon={<TrendingUp className="w-4 h-4" />}
           />
           <MetricCard
-            title="Throughput"
+            title="THROUGHPUT"
             value={`${(snapshot?.throughput || 1850).toFixed(0)}`}
             subValue="pkts/s"
             icon={<Zap className="w-4 h-4" />}
           />
           <MetricCard
-            title="Latency"
+            title="LATENCY"
             value={`${(snapshot?.latency_p50 || 640).toFixed(0)} μs`}
             subValue="p50 latency"
             icon={<ShieldCheck className="w-4 h-4" />}

@@ -13,7 +13,7 @@ export function SignalBadge({ signal }: { signal: 'BUY' | 'SELL' | 'HOLD' | stri
 
   return (
     <span className={twMerge(
-      'w-fit max-w-full inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-2.5 sm:px-3 py-0.5 text-xs font-mono font-bold tracking-wider uppercase rounded-full border',
+      'w-fit inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-3.5 py-1 text-xs font-mono font-bold tracking-wider uppercase rounded-full border',
       styles
     )}>
       <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', s === 'BUY' ? 'bg-[#00ff87] animate-pulse' : s === 'SELL' ? 'bg-red-400' : 'bg-amber-300')} />
@@ -26,7 +26,7 @@ export function ChangeBadge({ change, changePct }: { change?: number; changePct?
   const isPos = (changePct ?? change ?? 0) >= 0;
   return (
     <span className={clsx(
-      'w-fit max-w-full inline-flex shrink-0 items-center justify-center gap-1 whitespace-nowrap px-3.5 sm:px-4 py-1 text-xs font-medium rounded-full border font-mono',
+      'w-fit inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-3.5 py-1 text-xs font-medium rounded-full border font-mono',
       isPos ? 'bg-emerald-950/60 text-[#00ff87] border-emerald-500/30' : 'bg-red-950/60 text-red-400 border-red-500/30'
     )}>
       <span>{isPos ? '▲' : '▼'}</span>
@@ -43,7 +43,7 @@ export function StatusBadge({ status }: { status: 'connecting' | 'connected' | '
   }[status] || { bg: 'bg-emerald-500', text: 'text-emerald-400', label: 'STREAM ACTIVE' };
 
   return (
-    <div className="w-fit max-w-full inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3.5 sm:px-4 py-1 text-xs font-medium rounded-full bg-[#0e131d]/90 border border-white/10 shadow-sm">
+    <div className="w-fit inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3.5 py-1 text-xs font-medium rounded-full bg-[#0e131d]/90 border border-white/10 shadow-sm">
       <span className={clsx('w-2 h-2 rounded-full shrink-0', config.bg)} />
       <span className={clsx('font-mono tracking-wider uppercase text-[11px]', config.text)}>{config.label}</span>
     </div>
@@ -52,7 +52,7 @@ export function StatusBadge({ status }: { status: 'connecting' | 'connected' | '
 
 export function IndicatorBadge({ label, badge }: { label: string; badge?: string }) {
   return (
-    <span className="w-fit max-w-full inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-2.5 sm:px-3 py-0.5 text-xs font-mono font-bold rounded-full bg-[#0e131d] border border-white/10 text-white">
+    <span className="w-fit inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-3.5 py-1 text-xs font-mono font-bold rounded-full bg-[#0e131d] border border-white/10 text-white">
       <span>{label}</span>
       {badge && (
         <span className="px-1.5 py-0.2 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-[9px] font-bold border border-[#00ff87]/30">

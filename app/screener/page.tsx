@@ -77,7 +77,7 @@ export default function ScreenerPage() {
           <div className="flex flex-col gap-1">
             <h1 className="text-lg sm:text-2xl font-mono font-bold text-white tracking-wider flex items-center gap-2.5">
               REAL-TIME MARKET SCREENER
-              <span className="w-fit px-2.5 py-0.5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-xs font-bold border border-[#00ff87]/30">
+              <span className="w-fit px-3 py-0.5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-xs font-bold border border-[#00ff87]/30">
                 {filteredItems.length} EQUITIES
               </span>
             </h1>
@@ -135,50 +135,50 @@ export default function ScreenerPage() {
           ))}
         </div>
 
-        {/* Screener Data Table */}
+        {/* Screener Data Table with pl-4 sm:pl-6 on first column to fix clipping */}
         <div className="w-full rounded-2xl bg-[#0e131d]/90 border border-white/10 p-0 overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">
               <thead className="bg-black/40 border-b border-white/10 text-[var(--text-muted)] uppercase text-[10px] tracking-wider">
                 <tr>
-                  <th className="p-4 cursor-pointer hover:text-white" onClick={() => handleSort('ticker')}>
+                  <th className="pl-4 sm:pl-6 pr-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort('ticker')}>
                     <div className="flex items-center gap-1.5">
-                      <span>Ticker</span>
+                      <span>TICKER</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="p-4 cursor-pointer hover:text-white" onClick={() => handleSort('price')}>
+                  <th className="px-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort('price')}>
                     <div className="flex items-center gap-1.5">
                       <span>LTP (₹)</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="p-4 cursor-pointer hover:text-white" onClick={() => handleSort('change_pct')}>
+                  <th className="px-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort('change_pct')}>
                     <div className="flex items-center gap-1.5">
-                      <span>24h Change</span>
+                      <span>24H CHANGE</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="p-4 cursor-pointer hover:text-white" onClick={() => handleSort('rsi')}>
+                  <th className="px-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort('rsi')}>
                     <div className="flex items-center gap-1.5">
                       <span>RSI (14)</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="p-4 cursor-pointer hover:text-white" onClick={() => handleSort('quant_score')}>
+                  <th className="px-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort('quant_score')}>
                     <div className="flex items-center gap-1.5">
-                      <span>Quant Score</span>
+                      <span>QUANT SCORE</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="p-4">AI Signal</th>
-                  <th className="p-4 cursor-pointer hover:text-white" onClick={() => handleSort('volume')}>
+                  <th className="px-4 py-4">AI SIGNAL</th>
+                  <th className="px-4 py-4 cursor-pointer hover:text-white" onClick={() => handleSort('volume')}>
                     <div className="flex items-center gap-1.5">
-                      <span>Volume</span>
+                      <span>VOLUME</span>
                       <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="p-4 text-right">Action</th>
+                  <th className="px-4 py-4 text-right pr-6">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -191,7 +191,7 @@ export default function ScreenerPage() {
                       router.push('/terminal');
                     }}
                   >
-                    <td className="p-4">
+                    <td className="pl-4 sm:pl-6 pr-4 py-4">
                       <div className="flex flex-col">
                         <span className="font-bold text-white group-hover:text-[#00ff87] transition-colors">
                           {item.ticker}
@@ -201,11 +201,11 @@ export default function ScreenerPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="p-4 font-bold text-white">₹{item.price.toFixed(2)}</td>
-                    <td className="p-4">
+                    <td className="px-4 py-4 font-bold text-white">₹{item.price.toFixed(2)}</td>
+                    <td className="px-4 py-4">
                       <ChangeBadge changePct={item.change_pct} />
                     </td>
-                    <td className="p-4">
+                    <td className="px-4 py-4">
                       <span
                         className={`font-semibold ${
                           item.rsi >= 70 ? 'text-red-400 font-bold' : item.rsi <= 30 ? 'text-[#00ff87] font-bold' : 'text-[var(--text-secondary)]'
@@ -214,16 +214,16 @@ export default function ScreenerPage() {
                         {item.rsi.toFixed(1)}
                       </span>
                     </td>
-                    <td className="p-4">
+                    <td className="px-4 py-4">
                       <span className={item.quant_score >= 0 ? 'text-[#00ff87] font-bold' : 'text-red-400 font-bold'}>
                         {item.quant_score >= 0 ? `+${item.quant_score.toFixed(3)}` : item.quant_score.toFixed(3)}
                       </span>
                     </td>
-                    <td className="p-4">
+                    <td className="px-4 py-4">
                       <SignalBadge signal={item.recommendation || item.signal || 'HOLD'} />
                     </td>
-                    <td className="p-4 text-[var(--text-muted)]">{item.volume.toLocaleString()}</td>
-                    <td className="p-4 text-right">
+                    <td className="px-4 py-4 text-[var(--text-muted)]">{item.volume.toLocaleString()}</td>
+                    <td className="px-4 py-4 text-right pr-6">
                       <Button variant="ghost" size="sm">
                         Trade →
                       </Button>

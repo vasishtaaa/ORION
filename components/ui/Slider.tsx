@@ -26,10 +26,10 @@ export function Slider({
   const percentage = ((value - min) / (max - min)) * 100;
 
   return (
-    <div className={clsx('flex flex-col gap-2 w-full', className)}>
+    <div className={clsx('w-full flex flex-col space-y-2 p-3 rounded-xl bg-[#0a0d14]/70 border border-white/5', className)}>
       <div className="flex items-center justify-between text-xs font-mono">
-        <span className="text-[var(--text-secondary)] font-medium">{label}</span>
-        <span className="px-2 py-0.5 rounded-md bg-[#001f11] border border-[rgba(80,200,120,0.3)] text-[#00ff87] font-bold">
+        <span className="text-[var(--text-secondary)] font-medium truncate pr-2">{label}</span>
+        <span className="w-fit px-2.5 py-0.5 rounded-md bg-[#001f11] border border-[rgba(80,200,120,0.3)] text-[#00ff87] font-bold text-xs shrink-0">
           {value}{unit}
         </span>
       </div>
@@ -49,7 +49,7 @@ export function Slider({
         />
       </div>
 
-      <div className="flex justify-between text-[9px] font-mono text-[var(--text-muted)] px-0.5">
+      <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1 px-0.5">
         <span>{min}{unit}</span>
         <span>{max}{unit}</span>
       </div>
