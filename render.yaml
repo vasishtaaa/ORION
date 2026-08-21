@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: orion-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python listener.py
+    autoDeploy: true
+
+  - type: web
+    name: orion-frontend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./out
+    autoDeploy: true
+    envVars:
+      - key: NEXT_PUBLIC_VORTEX_WS_URL
+        value: wss://vortex-backend-1pf6.onrender.com
+      - key: NEXT_PUBLIC_VORTEX_API_URL
+        value: https://vortex-backend-1pf6.onrender.com
