@@ -1,8 +1,7 @@
 'use client';
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Candle } from '@/lib/types';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import { Layers, Eye, TrendingUp, Maximize2 } from 'lucide-react';
 
 export type Timeframe = 'LIVE' | '1D' | '1W' | '1M' | '6M' | '1Y';
 
@@ -21,12 +20,28 @@ export default function CandlestickChart({
 }: CandlestickChartProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 600, height: 360 });
   const [hoveredCandle, setHoveredCandle] = useState<Candle | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
 
   const [showVolume, setShowVolume] = useState(true);
   const [showVWAP, setShowVWAP] = useState(true);
   const [showSMA, setShowSMA] = useState(true);
+
+  // ResizeObserver for Pixel-Perfect Canvas auto-resizing
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          setDimensions({ width, height });
+        }
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Timeframe filter
   const displayCandles = useMemo(() => {
@@ -38,20 +53,18 @@ export default function CandlestickChart({
   }, [candles, currentTimeframe]);
 
   // Main Canvas Rendering Loop
-  useEffect(() => {
+  const renderChart = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    const { width, height } = dimensions;
 
-    const width = rect.width;
-    const height = rect.height;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
 
     ctx.clearRect(0, 0, width, height);
 
@@ -63,9 +76,9 @@ export default function CandlestickChart({
       return;
     }
 
-    const padding = { top: 24, right: 65, bottom: 40, left: 16 };
-    const chartW = width - padding.left - padding.right;
-    const chartH = height - padding.top - padding.bottom;
+    const padding = { top: 20, right: 60, bottom: 30, left: 12 };
+    const chartW = Math.max(10, width - padding.left - padding.right);
+    const chartH = Math.max(10, height - padding.top - padding.bottom);
 
     // Calculate Price Range
     let minPrice = Infinity;
@@ -88,7 +101,7 @@ export default function CandlestickChart({
     // 1. Grid Lines
     ctx.strokeStyle = 'rgba(80, 200, 120, 0.06)';
     ctx.lineWidth = 1;
-    const numGrid = 5;
+    const numGrid = 4;
     for (let i = 0; i <= numGrid; i++) {
       const y = padding.top + (chartH / numGrid) * i;
       ctx.beginPath();
@@ -98,23 +111,23 @@ export default function CandlestickChart({
 
       const priceVal = maxPrice - (fullRange / numGrid) * i;
       ctx.fillStyle = 'rgba(240, 255, 248, 0.35)';
-      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.font = '9px "JetBrains Mono", monospace';
       ctx.textAlign = 'left';
-      ctx.fillText(priceVal.toFixed(2), width - padding.right + 8, y + 3);
+      ctx.fillText(priceVal.toFixed(2), width - padding.right + 6, y + 3);
     }
 
     const n = displayCandles.length;
-    const candleW = Math.max(3, (chartW / n) * 0.7);
     const stepX = chartW / n;
+    const candleW = Math.max(2, stepX * 0.7);
 
     // 2. Volume Histogram Overlay
     if (showVolume && maxVol > 0) {
-      const volH = chartH * 0.25;
+      const volH = chartH * 0.22;
       displayCandles.forEach((c, idx) => {
         const x = padding.left + idx * stepX + stepX / 2;
         const vHeight = ((c.v || 0) / maxVol) * volH;
         const isUp = c.c >= c.o;
-        ctx.fillStyle = isUp ? 'rgba(0, 255, 135, 0.18)' : 'rgba(239, 68, 68, 0.18)';
+        ctx.fillStyle = isUp ? 'rgba(0, 255, 135, 0.16)' : 'rgba(239, 68, 68, 0.16)';
         ctx.fillRect(x - candleW / 2, padding.top + chartH - vHeight, candleW, vHeight);
       });
     }
@@ -215,13 +228,13 @@ export default function CandlestickChart({
 
       ctx.fillStyle = col;
       ctx.beginPath();
-      ctx.roundRect(width - padding.right + 2, latestY - 10, 58, 20, 4);
+      ctx.roundRect(width - padding.right + 2, latestY - 9, 54, 18, 4);
       ctx.fill();
 
       ctx.fillStyle = '#000000';
-      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      ctx.font = 'bold 9px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(latest.c.toFixed(2), width - padding.right + 31, latestY + 4);
+      ctx.fillText(latest.c.toFixed(2), width - padding.right + 29, latestY + 4);
     }
 
     // 7. Interactive Crosshair Tracking
@@ -244,16 +257,20 @@ export default function CandlestickChart({
       // Y-axis hover tag
       const hoverPrice = maxPrice - ((mousePos.y - padding.top) / chartH) * fullRange;
       ctx.fillStyle = '#002b18';
-      ctx.fillRect(width - padding.right + 2, mousePos.y - 9, 58, 18);
+      ctx.fillRect(width - padding.right + 2, mousePos.y - 9, 54, 18);
       ctx.strokeStyle = '#50C878';
-      ctx.strokeRect(width - padding.right + 2, mousePos.y - 9, 58, 18);
+      ctx.strokeRect(width - padding.right + 2, mousePos.y - 9, 54, 18);
 
       ctx.fillStyle = '#00ff87';
       ctx.font = 'bold 9px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(hoverPrice.toFixed(2), width - padding.right + 31, mousePos.y + 4);
+      ctx.fillText(hoverPrice.toFixed(2), width - padding.right + 29, mousePos.y + 4);
     }
-  }, [displayCandles, showVolume, showVWAP, showSMA, mousePos]);
+  }, [dimensions, displayCandles, showVolume, showVWAP, showSMA, mousePos]);
+
+  useEffect(() => {
+    renderChart();
+  }, [renderChart]);
 
   // Mouse Move Handler for Tooltip
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -264,8 +281,8 @@ export default function CandlestickChart({
     const y = e.clientY - rect.top;
     setMousePos({ x, y });
 
-    const paddingLeft = 16;
-    const paddingRight = 65;
+    const paddingLeft = 12;
+    const paddingRight = 60;
     const chartW = rect.width - paddingLeft - paddingRight;
     const stepX = chartW / displayCandles.length;
 
@@ -285,19 +302,19 @@ export default function CandlestickChart({
   const activeCandle = hoveredCandle || displayCandles[displayCandles.length - 1];
 
   return (
-    <div ref={containerRef} className="flex flex-col w-full h-full min-h-[420px] relative">
+    <div className="flex flex-col w-full h-full min-h-[360px] sm:min-h-[440px] aspect-[16/9] relative">
       {/* Chart Control Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[rgba(80,200,120,0.12)] px-1">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-white/10 px-1">
         {/* Active Candle HUD */}
         {activeCandle ? (
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4 font-mono text-xs">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 font-mono text-[11px] sm:text-xs">
             <span className="text-white font-bold tracking-wider">{activeTicker}</span>
-            <span className="text-[var(--text-muted)]">O: <span className="text-[#f0fff8] font-semibold">{activeCandle.o.toFixed(2)}</span></span>
-            <span className="text-[var(--text-muted)]">H: <span className="text-[#00ff87] font-semibold">{activeCandle.h.toFixed(2)}</span></span>
-            <span className="text-[var(--text-muted)]">L: <span className="text-red-400 font-semibold">{activeCandle.l.toFixed(2)}</span></span>
-            <span className="text-[var(--text-muted)]">C: <span className="text-[#f0fff8] font-bold">{activeCandle.c.toFixed(2)}</span></span>
+            <span className="text-[var(--text-muted)]">O:<span className="text-[#f0fff8] font-semibold">{activeCandle.o.toFixed(2)}</span></span>
+            <span className="text-[var(--text-muted)]">H:<span className="text-[#00ff87] font-semibold">{activeCandle.h.toFixed(2)}</span></span>
+            <span className="text-[var(--text-muted)]">L:<span className="text-red-400 font-semibold">{activeCandle.l.toFixed(2)}</span></span>
+            <span className="text-[var(--text-muted)]">C:<span className="text-[#f0fff8] font-bold">{activeCandle.c.toFixed(2)}</span></span>
             {activeCandle.v && (
-              <span className="text-[var(--text-muted)] hidden md:inline">Vol: <span className="text-cyan-300 font-semibold">{activeCandle.v.toLocaleString()}</span></span>
+              <span className="text-[var(--text-muted)] hidden md:inline">V:<span className="text-cyan-300 font-semibold">{activeCandle.v.toLocaleString()}</span></span>
             )}
           </div>
         ) : (
@@ -305,9 +322,9 @@ export default function CandlestickChart({
         )}
 
         {/* Timeframe & Overlay Toggles */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Overlay Toggles */}
-          <div className="hidden sm:flex items-center gap-1 bg-[#00140a] p-0.5 rounded-lg border border-[rgba(80,200,120,0.15)] text-[10px] font-mono">
+          <div className="hidden sm:flex items-center gap-1 bg-[#0e131d] p-0.5 rounded-lg border border-white/10 text-[10px] font-mono">
             <button
               onClick={() => setShowVWAP(!showVWAP)}
               className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${showVWAP ? 'bg-cyan-950/80 text-cyan-300 font-bold' : 'text-[var(--text-muted)] hover:text-white'}`}
@@ -343,8 +360,8 @@ export default function CandlestickChart({
         </div>
       </div>
 
-      {/* Main Canvas Area */}
-      <div className="relative flex-1 w-full min-h-[360px] mt-2">
+      {/* Main Responsive Canvas Container */}
+      <div ref={containerRef} className="relative flex-1 w-full min-h-[300px] mt-2">
         <canvas
           ref={canvasRef}
           onMouseMove={handleMouseMove}

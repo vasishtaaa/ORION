@@ -13,6 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -21,13 +22,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body
-        style={{ background: "#000e07", minHeight: "100vh" }}
-        className="text-[var(--text-primary)] font-sans antialiased overflow-x-hidden selection:bg-[#00ff87] selection:text-black"
+        className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white font-sans antialiased selection:bg-[#00ff87] selection:text-black flex flex-col"
       >
         <ToastProvider>
           <Preloader />
           <ClientBackgroundWrapper />
-          <div className="w-full flex flex-col min-h-screen">
+          <div className="w-full flex-1 flex flex-col">
             {children}
           </div>
         </ToastProvider>

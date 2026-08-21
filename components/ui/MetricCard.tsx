@@ -28,21 +28,21 @@ export function MetricCard({
   className,
 }: MetricCardProps) {
   return (
-    <GlassCard hoverEffect className={clsx('p-4 md:p-5 flex flex-col justify-between gap-3', className)}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-mono font-semibold tracking-wider text-[var(--text-secondary)] uppercase">
+    <GlassCard hoverEffect className={clsx('p-3.5 sm:p-4 lg:p-5 flex flex-col justify-between gap-2.5 sm:gap-3 w-full min-w-0', className)}>
+      <div className="flex items-center justify-between gap-1.5 min-w-0">
+        <span className="text-[10px] sm:text-[11px] font-mono font-semibold tracking-wider text-[var(--text-secondary)] uppercase truncate">
           {title}
         </span>
-        {icon && <span className="text-[var(--matrix)] opacity-80">{icon}</span>}
+        {icon && <span className="text-[var(--matrix)] opacity-80 flex-shrink-0">{icon}</span>}
       </div>
 
-      <div className="flex items-baseline justify-between gap-3 flex-wrap">
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl md:text-3xl font-mono font-extrabold tracking-tight text-[var(--text-primary)]">
+      <div className="flex items-baseline justify-between gap-2 flex-wrap min-w-0">
+        <div className="flex items-baseline gap-1.5 sm:gap-2 min-w-0">
+          <span className="text-lg sm:text-xl lg:text-2xl font-mono font-extrabold tracking-tight text-[var(--text-primary)] truncate">
             {value}
           </span>
           {subValue && (
-            <span className="text-xs font-mono text-[var(--text-muted)]">
+            <span className="text-[10px] sm:text-xs font-mono text-[var(--text-muted)] truncate hidden xs:inline">
               {subValue}
             </span>
           )}
@@ -51,7 +51,7 @@ export function MetricCard({
         {changePct !== undefined || change !== undefined ? (
           <ChangeBadge change={change} changePct={changePct} />
         ) : (
-          badge && <div>{badge}</div>
+          badge && <div className="flex-shrink-0">{badge}</div>
         )}
       </div>
     </GlassCard>
