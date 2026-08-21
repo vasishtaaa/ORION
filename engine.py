@@ -614,8 +614,8 @@ def encode_ws_message(payload_str):
 def start_websocket_server(port, telemetry_mgr):
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_sock.bind(('127.0.0.1', port))
-    server_sock.listen(5)
+    server_sock.bind(('0.0.0.0', port))
+    server_sock.listen(10)
     clients = set()
     clients_lock = threading.Lock()
 
@@ -916,8 +916,8 @@ def main():
         except Exception as pre_err:
             print(f"[Pre-warm] Note: {init_ticker} pre-fetch warning: {pre_err}")
     
-    http_port = 8000
-    ws_port = 8001
+    http_port = int(os.getenv('PORT', 8000))
+    ws_port = int(os.getenv('WS_PORT', 8001))
     
     os.makedirs('web', exist_ok=True)
 

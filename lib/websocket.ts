@@ -2,7 +2,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { VortexSnapshot, Candle } from './types';
 
-const WS_URL = 'ws://localhost:8001';
+const getWsUrl = () => {
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_VORTEX_WS_URL) {
+    return process.env.NEXT_PUBLIC_VORTEX_WS_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    // If deployed on cloud with custom backend host or default
+    return process.env.NEXT_PUBLIC_VORTEX_WS_URL || 'ws://localhost:8001';
+  }
+  return 'ws://localhost:8001';
+};
+
 const RECONNECT_DELAY = 2000;
 
 export type Timeframe = 'LIVE' | '1D' | '1W' | '1M' | '6M' | '1Y';
@@ -121,7 +131,7 @@ export function useVortexSocket() {
   const connect = useCallback(() => {
     if (typeof window === 'undefined') return;
     try {
-      const ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(getWsUrl());
       socketRef.current = ws;
 
       ws.onopen = () => {

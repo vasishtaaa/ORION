@@ -30,7 +30,8 @@ export default function NewsPage() {
   const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/news')
+    const apiUrl = process.env.NEXT_PUBLIC_VORTEX_API_URL || 'http://localhost:8000';
+    fetch(`${apiUrl}/api/news`)
       .then(r => r.json())
       .then(d => setNews(Array.isArray(d) ? d : d.news ?? []))
       .catch(() => {});
