@@ -1,13 +1,12 @@
 'use client';
-import React, { useRef } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 const VERT = `
 varying vec2 vUv;
 void main() {
   vUv = uv;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  gl_Position = vec4(position, 1.0);
 }`;
 
 const FRAG = `
@@ -65,45 +64,80 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-function FluidMesh() {
-  const { viewport } = useThree();
-  const matRef = useRef<THREE.ShaderMaterial>(null);
-  // Use a manual elapsed ref to avoid THREE.Clock deprecation warning
-  const elapsed = useRef(0);
-
-  useFrame((_, delta) => {
-    elapsed.current += delta;
-    if (matRef.current) {
-      matRef.current.uniforms.uTime.value = elapsed.current;
-    }
-  });
-
-  return (
-    <mesh>
-      <planeGeometry args={[viewport.width, viewport.height]} />
-      <shaderMaterial
-        ref={matRef}
-        vertexShader={VERT}
-        fragmentShader={FRAG}
-        uniforms={{
-          uTime: { value: 0 },
-          uResolution: { value: new THREE.Vector2(1920, 1080) },
-        }}
-      />
-    </mesh>
-  );
-}
-
 export default function LiquidBackground() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    let renderer: THREE.WebGLRenderer | null = null;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
+    } catch {
+      return;
+    }
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    container.appendChild(renderer.domElement);
+
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    const uniforms = {
+      uTime: { value: 0 },
+      uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    };
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader: VERT,
+      fragmentShader: FRAG,
+      uniforms,
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    let animationFrameId: number;
+    let clock = new THREE.Clock();
+
+    const animate = () => {
+      uniforms.uTime.value = clock.getElapsedTime();
+      if (renderer) {
+        renderer.render(scene, camera);
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      if (!renderer) return;
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationFrameId);
+      if (renderer && renderer.domElement && container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+        renderer.dispose();
+      }
+      geometry.dispose();
+      material.dispose();
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 -z-10 opacity-70" aria-hidden="true">
-      <Canvas
-        gl={{ antialias: false, alpha: false }}
-        dpr={[1, 1.5]}
-        camera={{ position: [0, 0, 1], fov: 60 }}
-      >
-        <FluidMesh />
-      </Canvas>
-    </div>
+    <div
+      ref={containerRef}
+      className="fixed inset-0 -z-10 opacity-70 pointer-events-none"
+      aria-hidden="true"
+    />
   );
 }
