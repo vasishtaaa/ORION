@@ -459,6 +459,7 @@ def generate_signal_llm(prices, mid, bids_l2, asks_l2, news_items, fundamentals=
         except Exception:
             return str(val)
 
+    fund = fundamentals if isinstance(fundamentals, dict) else {}
     recent_closes = [round(p, 2) for p in prices[-5:]] if prices else [round(mid, 2)]
 
     prompt = (
