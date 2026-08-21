@@ -7,16 +7,15 @@ const getWsUrl = () => {
     return process.env.NEXT_PUBLIC_VORTEX_WS_URL;
   }
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return process.env.NEXT_PUBLIC_VORTEX_WS_URL || 'ws://localhost:8001';
+    return process.env.NEXT_PUBLIC_VORTEX_WS_URL || 'wss://vortex-backend-1pf6.onrender.com';
   }
   return 'ws://localhost:8001';
 };
 
-const RECONNECT_DELAY = 3000;
+const RECONNECT_DELAY = 4000;
 
 export type Timeframe = 'LIVE' | '1D' | '1W' | '1M' | '6M' | '1Y';
 
-// Realistic sample base prices for fallback mode
 const BASE_PRICES: Record<string, { price: number; name: string }> = {
   'TCS_NSE': { price: 3942.50, name: 'Tata Consultancy Services' },
   'RELI_NSE': { price: 2985.20, name: 'Reliance Industries' },
@@ -152,7 +151,7 @@ export function useVortexSocket() {
   // Sync activeTicker from localStorage after mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('vortex_active_ticker');
+      const saved = localStorage.getItem('orion_active_ticker') || localStorage.getItem('vortex_active_ticker');
       if (saved) {
         setActiveTickerState(saved);
         setSnapshot(generateFallbackSnapshot(saved));
@@ -245,7 +244,7 @@ export function useVortexSocket() {
     timeframeRef.current = targetTf;
 
     if (typeof window !== 'undefined') {
-      localStorage.setItem('vortex_active_ticker', targetTicker);
+      localStorage.setItem('orion_active_ticker', targetTicker);
     }
 
     if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -265,7 +264,7 @@ export function useVortexSocket() {
 
       ws.onopen = () => {
         setStatus('connected');
-        const ticker = localStorage.getItem('vortex_active_ticker') || 'TCS_NSE';
+        const ticker = localStorage.getItem('orion_active_ticker') || localStorage.getItem('vortex_active_ticker') || 'TCS_NSE';
         const tf = timeframeRef.current || 'LIVE';
         ws.send(JSON.stringify({ action: 'subscribe', ticker, timeframe: tf }));
         ws.send(JSON.stringify({ cmd: 'select_ticker', ticker, timeframe: tf }));
@@ -302,7 +301,7 @@ export function useVortexSocket() {
   useEffect(() => {
     if (status !== 'connected') {
       simInterval.current = setInterval(() => {
-        setSnapshot(prev => {
+        setSnapshot((prev) => {
           if (!prev) return generateFallbackSnapshot(activeTickerRef.current);
           const drift = (Math.random() - 0.49) * (prev.mid * 0.0015);
           const newMid = Number((prev.mid + drift).toFixed(2));
