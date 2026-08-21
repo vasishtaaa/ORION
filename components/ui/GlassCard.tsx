@@ -1,37 +1,50 @@
 'use client';
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { HTMLAttributes } from 'react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-interface GlassCardProps {
-  children: React.ReactNode;
-  glow?: boolean;
-  float?: boolean;
-  floatDelay?: number;
-  className?: string;
-  onClick?: () => void;
+export interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'subtle' | 'elevated' | 'glow';
+  hoverEffect?: boolean;
 }
 
-export default function GlassCard({ children, glow, float, floatDelay = 0, className = '', onClick }: GlassCardProps) {
+export function GlassCard({
+  className,
+  variant = 'default',
+  hoverEffect = false,
+  children,
+  ...props
+}: GlassCardProps) {
+  const baseStyles = 'rounded-2xl relative overflow-hidden backdrop-blur-xl border transition-all duration-300';
+
+  const variants = {
+    default: 'bg-[#000e07]/85 border-[rgba(80,200,120,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]',
+    subtle: 'bg-[#00140a]/60 border-[rgba(80,200,120,0.10)] shadow-[0_4px_20px_rgba(0,0,0,0.35)]',
+    elevated: 'bg-[#001008]/95 border-[rgba(80,200,120,0.25)] shadow-[0_12px_40px_rgba(0,0,0,0.7)]',
+    glow: 'bg-[#000e07]/90 border-[rgba(0,255,135,0.3)] shadow-[0_0_30px_rgba(0,255,135,0.15),0_8px_32px_rgba(0,0,0,0.6)]',
+  };
+
+  const hoverStyles = hoverEffect ? 'hover:border-[rgba(80,200,120,0.4)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_25px_rgba(80,200,120,0.15)] hover:-translate-y-0.5' : '';
+
   return (
-    <motion.div
-      className={`glass p-5 cursor-default ${glow ? 'glow-md' : ''} ${className}`}
-      // Entry animation: fade+slide up once
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: floatDelay * 0.3 }}
-      // Float: separate from entry — use animate only after visible
-      {...(float ? {
-        animate: { y: [0, -10, 0] },
-        // Override transition for float animation
-      } : {})}
-      // Hover: scale up (no background color to avoid Framer Motion color-not-animatable warning)
-      whileHover={{ scale: 1.02, boxShadow: '0 0 28px rgba(80,200,120,0.28)' }}
-      whileTap={onClick ? { scale: 0.98 } : undefined}
-      style={{ transformOrigin: 'center' }}
-      onClick={onClick}
-    >
+    <div className={twMerge(clsx(baseStyles, variants[variant], hoverStyles, className))} {...props}>
       {children}
-    </motion.div>
+    </div>
+  );
+}
+
+export function GlassCardHeader({ className, children, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={twMerge(clsx('p-4 md:p-5 border-b border-[rgba(80,200,120,0.12)] flex items-center justify-between gap-4', className))} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export function GlassCardContent({ className, children, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={twMerge(clsx('p-4 md:p-5', className))} {...props}>
+      {children}
+    </div>
   );
 }

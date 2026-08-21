@@ -1,212 +1,225 @@
 'use client';
-import React from 'react';
-import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import AppHeader from '@/components/layout/AppHeader';
 import { useVortexSocket } from '@/lib/websocket';
-
-const AppHeader = dynamic(() => import('@/components/layout/AppHeader'), { ssr: false });
+import { MetricCard } from '@/components/ui/MetricCard';
+import { SignalBadge } from '@/components/ui/Badges';
+import { Button } from '@/components/ui/Button';
+import CandlestickChart from '@/components/charts/CandlestickChart';
+import OrderBookDepth from '@/components/charts/OrderBookDepth';
+import { PresetSelector } from '@/components/terminal/PresetSelector';
+import { Activity, Brain, LineChart, ShieldCheck, Zap, Sparkles, ArrowRight, Layers } from 'lucide-react';
 
 const FEATURES = [
   {
-    icon: '⚡',
-    title: 'Real-Time Order Flow',
-    desc: 'Sub-millisecond market data ingestion with Level 2 bid/ask depth, toxicity scoring, and live order book imbalance detection.',
+    icon: <Zap className="w-6 h-6 text-[#00ff87]" />,
+    title: 'Sub-Millisecond Ingestion',
+    desc: 'Real-time order flow engine streaming Level 2 market depth, tick latency metrics, and order book imbalance detection.',
     stat: '< 1ms',
-    statLabel: 'Latency',
+    statLabel: 'Packet Latency',
   },
   {
-    icon: '🧠',
-    title: 'Quantitative AI Engine',
-    desc: 'On-device Gemini 3.6 Flash integration with live technical indicators — RSI, MACD, Bollinger Bands, VWAP — for natural language market analysis.',
-    stat: '88%',
-    statLabel: 'Signal Accuracy',
+    icon: <Brain className="w-6 h-6 text-[#00ff87]" />,
+    title: 'Gemini Quantitative AI',
+    desc: 'On-device quantitative neural reasoning fusing RSI, MACD, Bollinger Bands, and live news sentiment into trade signals.',
+    stat: '88.4%',
+    statLabel: 'Confidence Score',
   },
   {
-    icon: '📰',
-    title: 'Intelligence Feed',
-    desc: 'Real-time RSS news scraping across 12 financial wire sources with keyword-based sentiment scoring and per-ticker context filtering.',
-    stat: '12',
-    statLabel: 'News Sources',
-  },
-];
-
-const STORY_SECTIONS = [
-  {
-    tag: '01 / BRAND IDENTITY',
-    heading: 'VORTEX-HF',
-    sub: 'High-Frequency Telemetry & Quantitative AI Engine',
-    desc: 'The professional-grade market intelligence terminal. Built for quantitative traders, analysts, and algo engineers who demand edge.',
-    isHero: true,
-  },
-  {
-    tag: '02 / MARKET DATA',
-    heading: 'Tick-Level Precision',
-    desc: 'Every trade, every quote, every price movement — captured and processed in real-time. Candlestick charts, Level 2 depth, VWAP anchoring.',
-  },
-  {
-    tag: '03 / AI ENGINE',
-    heading: 'Intelligence, Not Just Data',
-    desc: 'Ask anything about any stock in plain English. The Vortex AI analyst uses live market context to explain, predict, and advise.',
-  },
-  {
-    tag: '04 / NEWS WIRE',
-    heading: 'Market Intelligence Radar',
-    desc: '12 financial wire sources scraped in real-time. Headlines tagged, scored, and filtered by sentiment and ticker relevance.',
+    icon: <LineChart className="w-6 h-6 text-[#00ff87]" />,
+    title: 'Multi-Indicator Visuals',
+    desc: 'Volumetric candlestick charting, dynamic VWAP anchoring, institutional moving averages, and crosshair HUD tracking.',
+    stat: '20+',
+    statLabel: 'Bluechip Equities',
   },
 ];
 
 export default function LandingPage() {
-  const { status, snapshot } = useVortexSocket();
+  const { status, snapshot, activeTicker, selectTicker, timeframe, subscribe } = useVortexSocket();
 
   return (
-    <div className="min-h-screen relative flex flex-col gap-8 w-full" style={{ background: '#000e07' }}>
-      <AppHeader wsStatus={status} activeTicker={snapshot?.ticker} currentPath="/" />
+    <div className="min-h-screen relative flex flex-col gap-10 w-full" style={{ background: '#000e07' }}>
+      <AppHeader
+        wsStatus={status}
+        activeTicker={activeTicker}
+        currentPath="/"
+        onTickerSelect={(t) => selectTicker(t)}
+      />
 
-      {/* Story Scroll Sections */}
-      <div className="relative z-10 flex flex-col gap-12 w-full">
-        {STORY_SECTIONS.map((section, i) => (
-          <section
-            key={i}
-            className="relative min-h-[70vh] flex items-center justify-center py-8 w-full"
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 flex flex-col gap-16 pb-16">
+        {/* Hero Section */}
+        <section className="pt-6 sm:pt-12 text-center flex flex-col items-center gap-6 max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[rgba(80,200,120,0.12)] border border-[rgba(80,200,120,0.3)] text-xs font-mono text-[#00ff87] font-bold shadow-[0_0_20px_rgba(0,255,135,0.15)]">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>VORTEX HIGH-FREQUENCY TELEMETRY ENGINE 4.0</span>
+          </div>
+
+          <h1
+            className="font-sans font-black tracking-tight uppercase text-white"
+            style={{
+              fontSize: 'clamp(36px, 6vw, 76px)',
+              lineHeight: 1.05,
+              textShadow: '0 0 50px rgba(0,255,135,0.3)',
+            }}
           >
-            <motion.div
-              className="p-6 md:p-10 rounded-2xl border bg-[#000e07]/90 backdrop-blur-xl border-[rgba(80,200,120,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden max-w-4xl w-full text-center flex flex-col items-center gap-6"
-              initial={{ opacity: 0.85, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <p className="font-mono text-xs font-bold tracking-[4px] text-[var(--matrix)]">
-                {section.tag}
-              </p>
+            Real-Time Market <br />
+            <span className="bg-gradient-to-r from-[#00ff87] via-[#50C878] to-emerald-400 bg-clip-text text-transparent">
+              Telemetry & AI Edge
+            </span>
+          </h1>
 
-              {section.isHero ? (
-                <>
-                  <h1
-                    className="font-sans font-black tracking-[8px] uppercase text-[var(--matrix-bright)]"
-                    style={{ fontSize: 'clamp(44px, 7vw, 92px)', lineHeight: 1.05, textShadow: '0 0 50px rgba(0,255,135,0.4)' }}
-                  >
-                    {section.heading}
-                  </h1>
-                  <p className="font-mono text-xs font-semibold tracking-widest text-[var(--matrix)] text-center">
-                    {section.sub}
-                  </p>
-                </>
-              ) : (
-                <h2
-                  className="font-sans font-black tracking-wider uppercase text-center"
-                  style={{ fontSize: 'clamp(28px, 4.5vw, 56px)', lineHeight: 1.15, background: 'linear-gradient(135deg, #e8fff4 0%, #50C878 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                >
-                  {section.heading}
-                </h2>
-              )}
+          <p className="font-mono text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+            Institutional-grade order book analytics, multi-layer volumetric charting, and quantitative market reasoning powered by Gemini 3.6 Flash. Built for quantitative traders and market analysts.
+          </p>
 
-              <p className="font-mono text-xs font-semibold leading-relaxed max-w-2xl mx-auto text-[var(--text-secondary)] text-center">
-                {section.desc}
-              </p>
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pt-2">
+            <Link href="/terminal">
+              <Button variant="primary" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                Launch Terminal
+              </Button>
+            </Link>
+            <Link href="/analyst">
+              <Button variant="secondary" size="lg" leftIcon={<Brain className="w-4 h-4" />}>
+                AI Market Analyst
+              </Button>
+            </Link>
+            <Link href="/screener">
+              <Button variant="ghost" size="lg">
+                View Screener
+              </Button>
+            </Link>
+          </div>
+        </section>
 
-              {/* CTA buttons on hero */}
-              {section.isHero && (
-                <div className="flex flex-wrap gap-4 md:gap-6 justify-center items-center pt-4">
-                  <Link href="/terminal" className="no-underline inline-flex flex-shrink-0">
-                    <motion.button
-                      className="glass-pill cursor-pointer font-bold text-xs tracking-wider"
-                      style={{ background: 'var(--matrix)', color: '#000', borderColor: 'var(--matrix)', boxShadow: '0 0 24px rgba(80,200,120,0.4)' }}
-                      whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(80,200,120,0.7)' }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      🚀 ENTER TERMINAL
-                    </motion.button>
-                  </Link>
-                  <Link href="/analyst" className="no-underline inline-flex flex-shrink-0">
-                    <motion.button
-                      className="glass-pill text-matrix cursor-pointer font-bold text-xs tracking-wider"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      🧠 AI ANALYST
-                    </motion.button>
-                  </Link>
-                  <Link href="/screener" className="no-underline inline-flex flex-shrink-0">
-                    <motion.button
-                      className="glass-pill cursor-pointer font-bold text-xs tracking-wider"
-                      style={{ color: 'var(--text-secondary)' }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      🎯 SCREENER
-                    </motion.button>
-                  </Link>
-                </div>
-              )}
-
-              {/* Scroll prompt on hero */}
-              {i === 0 && (
-                <div className="pt-4 flex flex-col items-center gap-2 animate-bounce">
-                  <p className="font-mono text-[10px] tracking-widest text-[var(--text-muted)]">SCROLL TO EXPLORE</p>
-                  <span className="text-[var(--matrix)] text-sm">↓</span>
-                </div>
-              )}
-            </motion.div>
-          </section>
-        ))}
-
-        {/* Features Grid */}
-        <section className="relative flex flex-col items-center justify-center py-8 gap-6 w-full">
-          <div className="p-6 md:p-10 rounded-2xl border bg-[#000e07]/90 backdrop-blur-xl border-[rgba(80,200,120,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden max-w-6xl w-full flex flex-col items-center gap-8 text-center">
+        {/* Live Interactive Product Sandbox Preview */}
+        <section className="flex flex-col gap-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="font-mono text-xs font-bold tracking-[4px] text-[var(--matrix)]">05 / CORE CAPABILITIES</p>
-              <h2 className="font-sans text-3xl font-black tracking-wider uppercase mt-2" style={{ background: 'linear-gradient(135deg, #e8fff4, #50C878)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Unfair Advantage. Real-Time Alpha.
-              </h2>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#00ff87] animate-pulse" />
+                <h3 className="text-sm font-mono font-bold text-[var(--matrix-bright)] uppercase tracking-wider">
+                  Live Interactive Terminal Sandbox
+                </h3>
+              </div>
+              <p className="text-xs font-mono text-[var(--text-secondary)] mt-0.5">
+                Real-time telemetry for <span className="text-[#00ff87] font-bold">{activeTicker}</span>. Test tickers and timeframes.
+              </p>
+            </div>
+            <SignalBadge signal={snapshot?.signal || 'BUY'} />
+          </div>
+
+          {/* KPI Summary Cards Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <MetricCard
+              title={`${activeTicker} Price`}
+              value={`₹${(snapshot?.mid || 2500).toFixed(2)}`}
+              change={snapshot?.change}
+              changePct={snapshot?.change_pct}
+              icon={<Activity className="w-4 h-4" />}
+            />
+            <MetricCard
+              title="Target Price"
+              value={`₹${(snapshot?.target || snapshot?.mid * 1.035 || 2580).toFixed(2)}`}
+              subValue="Model Est."
+              badge={<SignalBadge signal={snapshot?.signal || 'BUY'} />}
+            />
+            <MetricCard
+              title="Throughput"
+              value={`${(snapshot?.throughput || 1850).toFixed(0)}`}
+              subValue="packets/sec"
+              icon={<Zap className="w-4 h-4" />}
+            />
+            <MetricCard
+              title="Query Latency"
+              value={`${(snapshot?.latency_p50 || 640).toFixed(0)} μs`}
+              subValue="p50 percentile"
+              icon={<ShieldCheck className="w-4 h-4" />}
+            />
+          </div>
+
+          {/* Main Chart + Order Book Depth Sandbox */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 rounded-2xl bg-[#001008]/90 border border-[rgba(80,200,120,0.18)] p-4 sm:p-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+              <CandlestickChart
+                candles={snapshot?.candles || []}
+                activeTicker={activeTicker}
+                currentTimeframe={timeframe}
+                onTimeframeChange={(tf) => subscribe(activeTicker, tf)}
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full pt-2">
-              {FEATURES.map((f, i) => (
-                <motion.div
-                  key={i}
-                  className="glass-sm rounded-xl p-6 overflow-hidden flex flex-col gap-4 text-left border border-[rgba(80,200,120,0.15)]"
-                  whileHover={{ y: -6, borderColor: 'rgba(80,200,120,0.4)', boxShadow: '0 12px 30px rgba(0,255,135,0.15)' }}
-                >
-                  <div className="text-4xl">{f.icon}</div>
-                  <h3 className="font-sans text-sm font-black tracking-widest uppercase text-[var(--matrix-bright)]">{f.title}</h3>
-                  <p className="font-mono text-xs font-semibold leading-relaxed flex-1 text-[var(--text-secondary)]">{f.desc}</p>
-                  <div className="pt-3 border-t border-[rgba(80,200,120,0.15)]">
-                    <span className="font-mono text-2xl font-black text-[var(--matrix)]">{f.stat}</span>
-                    <p className="font-mono text-[9px] font-semibold tracking-widest mt-0.5 text-[var(--text-muted)]">{f.statLabel}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <div className="rounded-2xl bg-[#001008]/90 border border-[rgba(80,200,120,0.18)] p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+              <div>
+                <h4 className="text-xs font-mono font-bold text-[var(--matrix-bright)] uppercase mb-3">
+                  Level 2 Order Book Depth
+                </h4>
+                <OrderBookDepth
+                  bids={snapshot?.bids_l2 || []}
+                  asks={snapshot?.asks_l2 || []}
+                  midPrice={snapshot?.mid || 0}
+                />
+              </div>
 
-            {/* Launch CTA */}
-            <div className="pt-8 border-t border-[rgba(80,200,120,0.15)] w-full flex flex-col items-center gap-4">
-              <p className="font-mono text-xs font-bold tracking-[4px] text-[var(--matrix)]">06 / LAUNCH SYSTEM</p>
-              <h2 className="font-sans text-2xl font-black tracking-wider uppercase text-[var(--text-primary)]">Ready For Market Execution</h2>
-              <p className="font-mono text-xs font-semibold text-[var(--text-secondary)]">Access the real-time command desk, market screener, or quantitative analyst.</p>
-              <div className="flex flex-wrap gap-6 justify-center pt-2">
-                <Link href="/terminal" className="no-underline inline-flex flex-shrink-0">
-                  <motion.button
-                    className="glass-pill cursor-pointer font-bold text-xs tracking-wider"
-                    style={{ background: 'var(--matrix)', color: '#000', boxShadow: '0 0 30px rgba(80,200,120,0.4)', borderColor: 'var(--matrix)' }}
-                    whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(80,200,120,0.7)' }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    🚀 Enter Market Dashboard
-                  </motion.button>
-                </Link>
-                <Link href="/analyst" className="no-underline inline-flex flex-shrink-0">
-                  <motion.button
-                    className="glass-pill text-matrix cursor-pointer font-bold text-xs tracking-wider"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    🧠 Open AI Analyst
-                  </motion.button>
-                </Link>
+              <div className="pt-3 border-t border-[rgba(80,200,120,0.12)] flex items-center justify-between text-xs font-mono">
+                <span className="text-[var(--text-muted)]">Spread</span>
+                <span className="text-white font-bold">
+                  ₹{((snapshot?.ask || 0) - (snapshot?.bid || 0)).toFixed(2)}
+                </span>
               </div>
             </div>
+          </div>
+
+          {/* Quick Preset Selector */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#001008]/80 border border-[rgba(80,200,120,0.15)]">
+            <PresetSelector
+              activeTicker={activeTicker}
+              onSelectTicker={(t) => selectTicker(t)}
+            />
+          </div>
+        </section>
+
+        {/* Core Capabilities Features Grid */}
+        <section className="flex flex-col gap-6 pt-6">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-xs font-mono font-bold tracking-[3px] text-[var(--matrix)] uppercase">
+              Core Platform Modules
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black uppercase text-white tracking-tight mt-1">
+              Built for Institutional Precision
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {FEATURES.map((f, i) => (
+              <div
+                key={i}
+                className="p-6 rounded-2xl bg-[#001008]/85 border border-[rgba(80,200,120,0.15)] hover:border-[#50C878] transition-all flex flex-col justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.4)] group"
+              >
+                <div className="flex flex-col gap-3">
+                  <div className="p-3 rounded-xl bg-[rgba(80,200,120,0.1)] w-fit group-hover:scale-105 transition-transform">
+                    {f.icon}
+                  </div>
+                  <h3 className="text-sm font-mono font-bold uppercase text-[#f0fff8] tracking-wider">
+                    {f.title}
+                  </h3>
+                  <p className="text-xs font-mono text-[var(--text-secondary)] leading-relaxed">
+                    {f.desc}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-[rgba(80,200,120,0.12)] flex items-baseline justify-between">
+                  <span className="text-2xl font-mono font-extrabold text-[#00ff87]">
+                    {f.stat}
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)] tracking-wider uppercase">
+                    {f.statLabel}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       </div>

@@ -2,7 +2,7 @@
 
 class AudioEngine {
   private ctx: AudioContext | null = null;
-  private isMuted: boolean = true; // Muted by default to respect browser policies
+  private isMuted: boolean = true;
 
   private initCtx() {
     if (typeof window === 'undefined') return;
@@ -28,6 +28,11 @@ class AudioEngine {
     return this.isMuted;
   }
 
+  public toggle(): boolean {
+    this.setMute(!this.isMuted);
+    return !this.isMuted;
+  }
+
   public playTick() {
     if (this.isMuted) return;
     this.initCtx();
@@ -38,7 +43,7 @@ class AudioEngine {
       const gain = this.ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(1200, this.ctx.currentTime); // High-frequency ping
+      osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.05);
 
       gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
@@ -65,15 +70,12 @@ class AudioEngine {
       osc.type = 'triangle';
       
       if (type === 'buy') {
-        // Ascending harmonic chime
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(880, now + 0.08);
       } else if (type === 'sell') {
-        // Descending chime
         osc.frequency.setValueAtTime(660, now);
         osc.frequency.setValueAtTime(330, now + 0.08);
       } else {
-        // Neutral sweep
         osc.frequency.setValueAtTime(523.25, now);
       }
 
@@ -90,3 +92,11 @@ class AudioEngine {
 }
 
 export const audio = new AudioEngine();
+
+export function toggleAudio(): boolean {
+  return audio.toggle();
+}
+
+export function isAudioEnabled(): boolean {
+  return !audio.getMute();
+}

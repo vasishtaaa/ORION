@@ -1,125 +1,95 @@
 'use client';
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { LiveBadge } from '../ui/Badges';
-
-const NAV_LINKS = [
-  { href: '/', label: 'Overview', icon: '⚡', key: 'F0' },
-  { href: '/terminal', label: 'Dashboard', icon: '📊', key: 'F1' },
-  { href: '/analyst', label: 'AI Analyst', icon: '🧠', key: 'F3' },
-  { href: '/screener', label: 'Screener', icon: '🎯', key: 'F4' },
-  { href: '/news', label: 'News Hub', icon: '📰', key: 'F2' },
-  { href: '/telemetry', label: 'Telemetry', icon: '📈', key: 'F6' },
-];
+import { X, Activity, Brain, LineChart, Newspaper, Gauge, Home } from 'lucide-react';
+import { clsx } from 'clsx';
 
 interface DrawerMenuProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
-  wsStatus: 'connecting' | 'connected' | 'disconnected';
-  activeTicker?: string;
   currentPath?: string;
+  activeTicker?: string;
 }
 
-export default function DrawerMenu({ open, onClose, wsStatus, activeTicker = 'TCS_NSE', currentPath = '/' }: DrawerMenuProps) {
-  const statusColor = wsStatus === 'connected' ? 'green' : wsStatus === 'connecting' ? 'yellow' : 'red';
-  const statusLabel = wsStatus.toUpperCase();
+const MENU_ITEMS = [
+  { href: '/', label: 'Overview & Story', icon: <Home className="w-4 h-4" /> },
+  { href: '/terminal', label: 'HFT Trading Terminal', icon: <Activity className="w-4 h-4" />, badge: 'LIVE' },
+  { href: '/analyst', label: 'AI Market Analyst', icon: <Brain className="w-4 h-4" />, badge: 'GEMINI' },
+  { href: '/screener', label: 'Quantitative Screener', icon: <LineChart className="w-4 h-4" /> },
+  { href: '/news', label: 'News Wire Radar', icon: <Newspaper className="w-4 h-4" /> },
+  { href: '/telemetry', label: 'Telemetry Diagnostics', icon: <Gauge className="w-4 h-4" /> },
+];
+
+export function DrawerMenu({ isOpen, onClose, currentPath = '/', activeTicker }: DrawerMenuProps) {
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            key="overlay"
-            className="fixed inset-0 z-[9998]"
-            style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-
-          {/* Drawer */}
-          <motion.aside
-            key="drawer"
-            className="fixed top-0 left-0 h-full z-[9999] flex flex-col p-6 rounded-r-2xl border-r bg-[#000e07]/95 backdrop-blur-xl border-[rgba(80,200,120,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.8)] overflow-hidden"
-            style={{
-              width: 320,
-              padding: '24px',
-            }}
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-6 mb-6" style={{ borderBottom: '1px solid rgba(80,200,120,0.15)' }}>
-              <div>
-                <h2 className="font-sans text-sm font-black tracking-widest uppercase text-[var(--matrix-bright)]">VORTEX-HF</h2>
-                <p className="font-mono text-[10px] font-semibold tracking-widest mt-1 text-[var(--text-muted)]">NAVIGATION PANEL</p>
+    <div className="fixed inset-0 z-50 lg:hidden">
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+      <div className="fixed right-0 top-0 bottom-0 w-80 bg-[#001008] border-l border-[rgba(80,200,120,0.2)] p-6 flex flex-col justify-between shadow-[0_0_50px_rgba(0,0,0,0.9)] animate-in slide-in-from-right duration-200">
+        <div>
+          <div className="flex items-center justify-between pb-6 border-b border-[rgba(80,200,120,0.15)]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#00ff87] to-[#006b3a] flex items-center justify-center font-black text-black text-xs">
+                V
               </div>
-              <button
-                onClick={onClose}
-                className="w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all duration-200 cursor-pointer"
-                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.2)';
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.1)';
-                }}
-              >✕</button>
+              <span className="font-sans font-black text-sm tracking-[2px] uppercase text-[#f0fff8]">
+                VORTEX-HF
+              </span>
             </div>
-
-            {/* Status Box (Inner Padding 16px 20px) */}
-            <div
-              className="rounded-xl flex items-center justify-between mb-6 shadow-lg overflow-hidden"
-              style={{
-                padding: '16px 20px',
-                background: 'rgba(0, 20, 10, 0.65)',
-                border: '1px solid rgba(80,200,120,0.15)',
-              }}
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg bg-[#001f11] text-[var(--text-secondary)] hover:text-white border border-[rgba(80,200,120,0.15)] cursor-pointer"
             >
-              <LiveBadge label={statusLabel} color={statusColor} />
-              <span className="font-mono text-xs font-semibold text-[var(--text-secondary)]">{activeTicker}</span>
-            </div>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
-            {/* Nav Links */}
-            <nav className="flex flex-col gap-3 flex-1 overflow-y-auto">
-              {NAV_LINKS.map((link) => {
-                const isActive = currentPath === link.href;
+          <div className="py-4">
+            <p className="text-[10px] font-mono tracking-widest text-[var(--text-muted)] uppercase mb-3 px-2">
+              Navigation Modules
+            </p>
+            <nav className="flex flex-col gap-1.5">
+              {MENU_ITEMS.map((item) => {
+                const isActive = currentPath === item.href;
                 return (
                   <Link
-                    key={link.href}
-                    href={link.href}
+                    key={item.href}
+                    href={item.href}
                     onClick={onClose}
-                    className={`flex items-center gap-4 rounded-xl text-sm font-semibold transition-all duration-200 overflow-hidden ${isActive ? '' : 'hover:translate-x-1'
-                      }`}
-                    style={{
-                      padding: '16px 20px',
-                      background: isActive ? 'linear-gradient(90deg, rgba(80,200,120,0.18) 0%, rgba(0,135,81,0.08) 100%)' : 'transparent',
-                      border: isActive ? '1px solid rgba(80,200,120,0.35)' : '1px solid transparent',
-                      color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                      boxShadow: isActive ? '0 0 20px rgba(80,200,120,0.15)' : 'none',
-                    }}
+                    className={clsx(
+                      'flex items-center justify-between px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold transition-all',
+                      isActive
+                        ? 'bg-[rgba(80,200,120,0.18)] text-[#00ff87] border border-[rgba(80,200,120,0.35)] shadow-[0_0_15px_rgba(0,255,135,0.15)]'
+                        : 'text-[var(--text-secondary)] hover:text-white hover:bg-[rgba(80,200,120,0.08)]'
+                    )}
                   >
-                    <span className="text-lg flex items-center justify-center w-6">{link.icon}</span>
-                    <span className="flex-1 tracking-wide font-sans text-sm font-bold">{link.label}</span>
-                    <span className="font-mono text-xs font-semibold text-[var(--text-muted)]">{link.key}</span>
+                    <div className="flex items-center gap-3">
+                      <span className={isActive ? 'text-[#00ff87]' : 'text-[var(--matrix)]'}>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#00ff87]/20 text-[#00ff87] font-bold">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
             </nav>
+          </div>
+        </div>
 
-            {/* Footer */}
-            <div className="pt-6 mt-6 overflow-hidden" style={{ borderTop: '1px solid rgba(80,200,120,0.15)' }}>
-              <p className="font-mono text-xs font-semibold text-[var(--text-muted)]">VORTEX Engine v4.0.0</p>
-              <p className="font-mono text-xs font-semibold mt-1.5 text-[var(--text-muted)]">LLM: Gemini 3.6 Flash · AI</p>
-            </div>
-          </motion.aside>
-        </>
-      )}
-    </AnimatePresence>
+        <div className="pt-4 border-t border-[rgba(80,200,120,0.15)] flex flex-col gap-2">
+          <div className="flex justify-between items-center text-[10px] font-mono text-[var(--text-muted)]">
+            <span>ACTIVE TICKER</span>
+            <span className="text-[#00ff87] font-bold">{activeTicker || 'TCS_NSE'}</span>
+          </div>
+          <p className="text-[10px] font-mono text-[var(--text-muted)] text-center">
+            VORTEX High-Frequency Engine v4.0
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

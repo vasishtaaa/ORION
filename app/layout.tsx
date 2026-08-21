@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import ClientBackgroundWrapper from "@/components/canvas/ClientBackgroundWrapper";
+import { ToastProvider } from "@/components/ui/Toast";
+import { Preloader } from "@/components/layout/Preloader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,11 +20,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body style={{ background: "#000e07", minHeight: "100vh" }} className="text-[var(--text-primary)] font-sans antialiased overflow-x-hidden">
-        <ClientBackgroundWrapper />
-        <main className="w-full max-w-[1600px] mx-auto p-4 md:p-6 min-h-screen flex flex-col gap-6">
-          {children}
-        </main>
+      <body
+        style={{ background: "#000e07", minHeight: "100vh" }}
+        className="text-[var(--text-primary)] font-sans antialiased overflow-x-hidden selection:bg-[#00ff87] selection:text-black"
+      >
+        <ToastProvider>
+          <Preloader />
+          <ClientBackgroundWrapper />
+          <div className="w-full flex flex-col min-h-screen">
+            {children}
+          </div>
+        </ToastProvider>
       </body>
     </html>
   );
