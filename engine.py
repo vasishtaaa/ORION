@@ -324,7 +324,11 @@ def fetch_single_ticker(ticker, telemetry_mgr, active):
     start_time = time.time_ns()
     req = urllib.request.Request(
         url,
-        headers={'User-Agent': 'Mozilla/5.0'}
+        headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Referer': 'https://finance.yahoo.com'
+        }
     )
     try:
         with urllib.request.urlopen(req, timeout=4) as response:
@@ -453,10 +457,8 @@ def fetch_single_ticker(ticker, telemetry_mgr, active):
                         'latency': latency_us
                     })
                 telemetry_mgr.set_recent_trades(formatted_trades)
-    except Exception as e:
-        print(f"[Poller Error] Exception querying {ticker}: {e}")
-        import traceback
-        traceback.print_exc()
+    except Exception:
+        pass
 
 def market_data_poller(telemetry_mgr):
     """

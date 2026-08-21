@@ -386,6 +386,46 @@ class SentimentAnalyzer:
 
 
 # ──────────────────────────────────────────────────────────────
+# 4.5 GEMINI 3.6 FLASH CLIENT
+# ──────────────────────────────────────────────────────────────
+
+def query_gemini_api(prompt: str, system_instruction: str = None) -> str:
+    """Directly queries Gemini REST API using the configured GEMINI_API_KEY with zero external deps."""
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    if not api_key:
+        return None
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
+        
+        full_prompt = f"{system_instruction}\n\n{prompt}" if system_instruction else prompt
+        payload = {
+            "contents": [{
+                "parts": [{"text": full_prompt}]
+            }],
+            "generationConfig": {
+                "temperature": 0.3,
+                "maxOutputTokens": 600
+            }
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode('utf-8'),
+            headers=headers,
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=7) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            candidates = data.get('candidates', [])
+            if candidates and 'content' in candidates[0]:
+                parts = candidates[0]['content'].get('parts', [])
+                if parts and 'text' in parts[0]:
+                    return parts[0]['text'].strip()
+    except Exception:
+        pass
+    return None
+
+# ──────────────────────────────────────────────────────────────
 # 5. SIGNAL GENERATOR
 # ──────────────────────────────────────────────────────────────
 
