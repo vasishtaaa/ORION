@@ -67,43 +67,38 @@ export default function AppHeader({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 w-full backdrop-blur-md bg-[#0a0d14]/85 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] flex justify-center">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
-          {/* Left: Logo & Brand */}
+      <header className="sticky top-0 z-40 h-16 w-full flex-shrink-0 bg-[#080b11]/90 border-b border-white/10 backdrop-blur-md flex items-center justify-center">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+          {/* Left: Logo & Brand Badge */}
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3 no-underline group flex-shrink-0">
+            <Link href="/" className="flex items-center gap-3 no-underline group shrink-0">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#00ff87] to-[#006b3a] flex items-center justify-center font-black text-black text-sm sm:text-base shadow-[0_0_20px_rgba(0,255,135,0.4)] group-hover:scale-105 transition-transform">
                 V
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="font-sans font-black text-base sm:text-lg tracking-[2px] sm:tracking-[3px] uppercase text-[#f0fff8] group-hover:text-[#00ff87] transition-colors">
-                    VORTEX
-                  </span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[rgba(80,200,120,0.15)] text-[#00ff87] font-bold border border-[rgba(80,200,120,0.3)]">
-                    HF-4.0
-                  </span>
-                </div>
-                <span className="text-[9px] sm:text-[10px] font-mono text-[var(--text-muted)] tracking-wider hidden xs:inline">
-                  TELEMETRY ENGINE
+              <div className="flex items-center gap-2">
+                <span className="font-sans font-black text-base sm:text-lg tracking-[2.5px] sm:tracking-[3px] uppercase text-white group-hover:text-[#00ff87] transition-colors">
+                  VORTEX
+                </span>
+                <span className="w-fit max-w-full inline-flex shrink-0 items-center justify-center px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-[rgba(80,200,120,0.15)] text-[#00ff87] border border-[rgba(80,200,120,0.3)]">
+                  HF-4.0
                 </span>
               </div>
             </Link>
           </div>
 
           {/* Right: Search Input (⌘K), Audio, Stream Status & Hamburger Menu Button */}
-          <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
-            {/* Search Combobox Button (Desktop) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            {/* Search Input Trigger */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden sm:flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group w-44 md:w-56"
+              className="hidden sm:inline-flex items-center justify-between gap-3 px-3.5 py-1.5 rounded-full bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group w-fit"
             >
-              <div className="flex items-center gap-2 truncate">
+              <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-[var(--matrix)] group-hover:text-[#00ff87]" />
-                <span className="truncate">Search ticker...</span>
+                <span>Search ticker...</span>
               </div>
-              <kbd className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] text-[#00ff87] font-mono">
+              <kbd className="px-1.5 py-0.5 rounded-full bg-black/40 border border-white/10 text-[10px] text-[#00ff87] font-mono">
                 ⌘K
               </kbd>
             </button>
@@ -112,37 +107,37 @@ export default function AppHeader({
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="sm:hidden p-2 rounded-xl bg-[#0e131d] border border-white/10 text-[var(--text-secondary)] hover:text-white cursor-pointer"
+              className="sm:hidden p-2 rounded-full bg-[#0e131d] border border-white/10 text-[var(--text-secondary)] hover:text-white cursor-pointer"
               title="Search ticker"
             >
               <Search className="w-4 h-4" />
             </button>
 
-            {/* Audio Acoustic Telemetry Toggle */}
+            {/* Audio Telemetry Toggle */}
             <button
               type="button"
               onClick={handleAudioToggle}
-              className={`p-2 rounded-xl border transition-all cursor-pointer hidden md:flex ${
+              className={`p-2 rounded-full border transition-all cursor-pointer hidden md:inline-flex ${
                 audioActive
                   ? 'bg-[#002413] text-[#00ff87] border-[#00ff87]/40 shadow-[0_0_12px_rgba(0,255,135,0.2)]'
                   : 'bg-[#0e131d] text-[var(--text-muted)] border-white/10 hover:text-white'
               }`}
-              title={audioActive ? 'Mute acoustic telemetry audio' : 'Enable acoustic telemetry audio'}
+              title={audioActive ? 'Mute acoustic audio' : 'Enable acoustic audio'}
             >
               {audioActive ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
 
-            {/* Stream Active Indicator */}
+            {/* Status Pill Badge */}
             <StatusBadge status={wsStatus} />
 
-            {/* Sliding Drawer Hamburger Toggle Button (Universal across all viewports) */}
+            {/* Sliding Drawer Hamburger Toggle Button */}
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-[#0e131d] hover:bg-[#141b29] border border-white/10 hover:border-[#50C878] text-[var(--text-primary)] hover:text-[#00ff87] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+              className="p-2 sm:px-3.5 sm:py-1.5 rounded-full bg-[#0e131d] hover:bg-[#141b29] border border-white/10 hover:border-[#50C878] text-[var(--text-primary)] hover:text-[#00ff87] transition-all cursor-pointer inline-flex items-center gap-2 shadow-sm w-fit"
               aria-label="Open Navigation Menu"
             >
-              <Menu className="w-5 h-5 text-[#00ff87]" />
+              <Menu className="w-4 h-4 sm:w-4 sm:h-4 text-[#00ff87]" />
               <span className="hidden sm:inline font-mono font-bold text-xs tracking-wider uppercase">
                 Menu
               </span>
@@ -186,7 +181,7 @@ export default function AppHeader({
                     success(`Switched to ${t}`);
                     router.push('/terminal');
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-[#0e131d] hover:bg-[#00ff87]/20 border border-white/10 text-xs font-mono text-[#f0fff8] hover:text-[#00ff87] transition-all cursor-pointer"
+                  className="px-3 py-1 rounded-full bg-[#0e131d] hover:bg-[#00ff87]/20 border border-white/10 text-xs font-mono text-[#f0fff8] hover:text-[#00ff87] transition-all cursor-pointer"
                 >
                   {t}
                 </button>

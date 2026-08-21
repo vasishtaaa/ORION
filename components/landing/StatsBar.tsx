@@ -10,18 +10,18 @@ const STATS = [
 
 export function StatsBar() {
   return (
-    <section className="w-full py-12 border-y border-white/10 bg-[#06090e]/80 backdrop-blur-md">
+    <section className="w-full py-16 sm:py-20 border-y border-white/10 bg-[#06090e]/80 backdrop-blur-md">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">
           {STATS.map((s, idx) => (
-            <div key={idx} className="flex flex-col gap-1 text-center md:text-left min-w-0">
-              <span className="text-2xl sm:text-3xl lg:text-4xl font-mono font-black text-[#00ff87] tracking-tight">
+            <div key={idx} className="flex flex-col gap-1.5 text-center md:text-left min-w-0">
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-mono font-black text-[#00ff87] tracking-tight">
                 {s.value}
               </span>
               <span className="text-xs sm:text-sm font-mono font-bold text-white uppercase tracking-wider">
                 {s.label}
               </span>
-              <span className="text-[11px] font-mono text-[var(--text-muted)] truncate">
+              <span className="text-xs font-mono text-[var(--text-muted)] truncate">
                 {s.sub}
               </span>
             </div>
