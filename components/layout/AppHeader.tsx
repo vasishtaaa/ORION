@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { StatusBadge } from '@/components/ui/Badges';
 import { DrawerMenu } from './DrawerMenu';
 import { useToast } from '@/components/ui/Toast';
-import { Search, Menu, Volume2, VolumeX } from 'lucide-react';
+import { Search, Menu, Volume2, VolumeX, ArrowRight } from 'lucide-react';
 import { toggleAudio, isAudioEnabled } from '@/lib/audio';
 
 interface AppHeaderProps {
@@ -16,12 +16,11 @@ interface AppHeaderProps {
 }
 
 const NAV_LINKS = [
-  { href: '/', label: 'Overview' },
-  { href: '/terminal', label: 'Terminal', badge: 'LIVE' },
+  { href: '/terminal', label: 'Platform' },
   { href: '/analyst', label: 'AI Analyst', badge: 'GEMINI' },
   { href: '/screener', label: 'Screener' },
   { href: '/news', label: 'News Wire' },
-  { href: '/telemetry', label: 'Telemetry' },
+  { href: '/telemetry', label: 'Performance' },
 ];
 
 export default function AppHeader({
@@ -76,7 +75,7 @@ export default function AppHeader({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 w-full backdrop-blur-md bg-black/60 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] flex justify-center">
+      <header className="fixed top-0 left-0 right-0 z-40 w-full backdrop-blur-md bg-[#0a0d14]/80 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] flex justify-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           {/* Left: Logo & Brand */}
           <div className="flex items-center gap-3">
@@ -100,8 +99,8 @@ export default function AppHeader({
             </Link>
           </div>
 
-          {/* Center: Navigation Links + Search Bar (Desktop) */}
-          <div className="hidden lg:flex items-center gap-4 flex-1 justify-center max-w-2xl mx-auto">
+          {/* Center: Navigation Links (Desktop) */}
+          <div className="hidden lg:flex items-center gap-1 justify-center max-w-2xl mx-auto">
             <nav className="flex items-center gap-1">
               {NAV_LINKS.map((link) => {
                 const isActive = currentPath === link.href;
@@ -125,39 +124,15 @@ export default function AppHeader({
                 );
               })}
             </nav>
-
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group w-48"
-            >
-              <div className="flex items-center gap-2 truncate">
-                <Search className="w-3.5 h-3.5 text-[var(--matrix)] group-hover:text-[#00ff87]" />
-                <span className="truncate">Search...</span>
-              </div>
-              <kbd className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] text-[#00ff87] font-mono">
-                ⌘K
-              </kbd>
-            </button>
           </div>
 
-          {/* Right: Stream Controls & Status */}
+          {/* Right: Status Indicator & Launch Terminal Primary CTA */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Search Icon button on Mobile & Tablet */}
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              className="lg:hidden p-2 rounded-xl bg-[#0e131d] border border-white/10 text-[var(--text-secondary)] hover:text-white cursor-pointer"
-              title="Search ticker"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-
             {/* Audio Toggle */}
             <button
               type="button"
               onClick={handleAudioToggle}
-              className={`p-2 rounded-xl border transition-all cursor-pointer ${
+              className={`p-2 rounded-xl border transition-all cursor-pointer hidden sm:flex ${
                 audioActive
                   ? 'bg-[#002413] text-[#00ff87] border-[#00ff87]/40 shadow-[0_0_12px_rgba(0,255,135,0.2)]'
                   : 'bg-[#0e131d] text-[var(--text-muted)] border-white/10 hover:text-white'
@@ -169,6 +144,15 @@ export default function AppHeader({
 
             {/* Status Badge */}
             <StatusBadge status={wsStatus} />
+
+            {/* High-Contrast Primary CTA Button */}
+            <Link
+              href="/terminal"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#50C878] text-black font-mono font-bold text-xs hover:bg-[#00ff87] shadow-[0_0_20px_rgba(80,200,120,0.35)] hover:shadow-[0_0_30px_rgba(0,255,135,0.6)] transition-all cursor-pointer active:scale-95"
+            >
+              <span>Launch Terminal</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
 
             {/* Mobile Hamburger Drawer Trigger (< 1024px) */}
             <button
