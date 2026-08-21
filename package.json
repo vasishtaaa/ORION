@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/three": "^0.170.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
     "next": "^16.2.12",
@@ -23,6 +22,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.170.0",
     "postcss": "^8",
     "tailwindcss": "^4.0.0",
     "typescript": "^5"
