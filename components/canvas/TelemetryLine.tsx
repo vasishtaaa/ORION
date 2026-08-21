@@ -1,6 +1,5 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import React, { useId } from 'react';
 
 interface TelemetryLineProps {
   data: number[];
@@ -10,44 +9,41 @@ interface TelemetryLineProps {
 }
 
 export default function TelemetryLine({ data, color = '#50C878', height = 60, label }: TelemetryLineProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
+  const gradId = useId();
 
-  useEffect(() => {
-    if (!svgRef.current || data.length < 2) return;
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove();
+  if (!data || data.length < 2) {
+    return null;
+  }
 
-    const W = svgRef.current.clientWidth || 200;
-    const H = height;
-    const x = d3.scaleLinear().domain([0, data.length - 1]).range([0, W]);
-    const y = d3.scaleLinear().domain([d3.min(data) ?? 0, d3.max(data) ?? 1]).range([H - 2, 2]);
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const width = 200;
 
-    const area = d3.area<number>()
-      .x((_, i) => x(i)).y0(H).y1(d => y(d))
-      .curve(d3.curveCatmullRom.alpha(0.5));
+  const points = data.map((d, i) => {
+    const x = (i / (data.length - 1)) * width;
+    const y = height - 4 - ((d - min) / range) * (height - 8);
+    return `${x},${y}`;
+  });
 
-    const line = d3.line<number>()
-      .x((_, i) => x(i)).y(d => y(d))
-      .curve(d3.curveCatmullRom.alpha(0.5));
-
-    const gradId = `tg-${Math.random().toString(36).slice(2)}`;
-    const defs = svg.append('defs');
-    const grad = defs.append('linearGradient').attr('id', gradId).attr('x1', '0').attr('x2', '0').attr('y1', '0').attr('y2', '1');
-    grad.append('stop').attr('offset', '0%').attr('stop-color', color).attr('stop-opacity', 0.25);
-    grad.append('stop').attr('offset', '100%').attr('stop-color', color).attr('stop-opacity', 0.0);
-
-    svg.append('path').datum(data).attr('d', area).attr('fill', `url(#${gradId})`);
-    svg.append('path').datum(data).attr('d', line).attr('fill', 'none').attr('stroke', color).attr('stroke-width', 1.5);
-
-    const last = data[data.length - 1];
-    svg.append('circle').attr('cx', x(data.length - 1)).attr('cy', y(last)).attr('r', 2.5).attr('fill', color);
-
-  }, [data, color, height]);
+  const linePath = `M ${points.join(' L ')}`;
+  const areaPath = `M 0,${height} L ${points.join(' L ')} L ${width},${height} Z`;
+  const lastPoint = points[points.length - 1].split(',');
 
   return (
-    <div>
-      {label && <p className="text-[9px] mono tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>{label}</p>}
-      <svg ref={svgRef} width="100%" height={height} style={{ overflow: 'visible' }} />
+    <div className="w-full">
+      {label && <p className="text-[9px] font-mono tracking-widest mb-1 text-[var(--text-muted)]">{label}</p>}
+      <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="overflow-visible">
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.25} />
+            <stop offset="100%" stopColor={color} stopOpacity={0.0} />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill={`url(#${gradId})`} />
+        <path d={linePath} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={Number(lastPoint[0])} cy={Number(lastPoint[1])} r={3} fill={color} />
+      </svg>
     </div>
   );
 }
