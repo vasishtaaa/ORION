@@ -10,7 +10,7 @@ import { Brain, Send, Sparkles, Copy, Trash2, TrendingUp, ShieldAlert, Cpu } fro
 
 interface ChatMessage {
   id: string;
-  sender: 'user' | 'vortex';
+  sender: 'user' | 'orion';
   text: string;
   timestamp: string;
 }
@@ -28,8 +28,8 @@ export default function AnalystPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
-      sender: 'vortex',
-      text: `Hello, Trader. I am Vortex AI, powered by Google Gemini 3.6 Flash. I continuously analyze real-time order book telemetry, quantitative momentum indicators, and fundamental metrics for ${activeTicker}. Ask me any question or select a preset query below.`,
+      sender: 'orion',
+      text: `Hello, Trader. I am ORION AI, powered by Google Gemini 3.6 Flash. I continuously analyze real-time order book telemetry, quantitative momentum indicators, and fundamental metrics for ${activeTicker}. Ask me any question or select a preset query below.`,
       timestamp: 'Just now',
     },
   ]);
@@ -66,7 +66,7 @@ export default function AnalystPage() {
               ...prev,
               {
                 id: `v-${Date.now()}`,
-                sender: 'vortex',
+                sender: 'orion',
                 text: data.text || 'Analysis completed.',
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
               },
@@ -90,7 +90,7 @@ export default function AnalystPage() {
           ...prev,
           {
             id: `v-${Date.now()}`,
-            sender: 'vortex',
+            sender: 'orion',
             text: `### Quantitative Analysis for ${activeTicker} (₹${mid.toFixed(2)})\n\n- **Signal Recommendation**: **${sig}** (${conf}% confidence)\n- **Target Estimate**: **₹${target.toFixed(2)}**\n- **Order Book Imbalance (OBI)**: Liquidity depth indicates bullish pressure on bid side.\n- **Technical Consensus**: RSI is neutral at 52.4, with MACD histogram expanding positive. Risk is controlled with invalidation below ₹${(mid * 0.985).toFixed(2)}.`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           },
@@ -111,7 +111,7 @@ export default function AnalystPage() {
     setMessages([
       {
         id: 'reset',
-        sender: 'vortex',
+        sender: 'orion',
         text: `Chat history cleared. Live market stream ready for ${activeTicker}.`,
         timestamp: 'Just now',
       },
@@ -131,25 +131,25 @@ export default function AnalystPage() {
         {/* Header & KPI Summary Grid */}
         <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
           <MetricCard
-            title="Model Signal"
+            title="MODEL SIGNAL"
             value={snapshot?.signal || 'BUY'}
             badge={<SignalBadge signal={snapshot?.signal || 'BUY'} />}
             icon={<Cpu className="w-4 h-4" />}
           />
           <MetricCard
-            title="Confidence"
+            title="CONFIDENCE"
             value={`${(snapshot?.confidence || 84.5).toFixed(1)}%`}
             subValue="Certainty"
             icon={<TrendingUp className="w-4 h-4" />}
           />
           <MetricCard
-            title="Sentiment"
+            title="SENTIMENT"
             value={`${((snapshot?.sentiment || 0.62) * 100).toFixed(0)}%`}
             subValue="Bullish"
             icon={<Sparkles className="w-4 h-4" />}
           />
           <MetricCard
-            title="Model Loss"
+            title="MODEL LOSS"
             value={`${(snapshot?.model_loss || 0.024).toFixed(4)}`}
             subValue="Converged"
             icon={<ShieldAlert className="w-4 h-4" />}
@@ -166,8 +166,8 @@ export default function AnalystPage() {
               </div>
               <div className="min-w-0">
                 <h2 className="text-xs sm:text-sm font-mono font-bold text-white flex items-center gap-2 truncate">
-                  VORTEX QUANTITATIVE REASONING
-                  <span className="w-fit px-2 py-0.5 rounded-full bg-[rgba(80,200,120,0.2)] text-[#00ff87] text-[9px] font-bold hidden sm:inline">
+                  ORION QUANTITATIVE REASONING
+                  <span className="w-fit px-2.5 py-0.5 rounded-full bg-[rgba(80,200,120,0.2)] text-[#00ff87] text-[9px] font-bold hidden sm:inline">
                     GEMINI 3.6 FLASH
                   </span>
                 </h2>
@@ -191,7 +191,7 @@ export default function AnalystPage() {
                 }`}
               >
                 <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)] px-1">
-                  <span>{m.sender === 'user' ? 'You' : 'Vortex AI'}</span>
+                  <span>{m.sender === 'user' ? 'You' : 'ORION AI'}</span>
                   <span>•</span>
                   <span>{m.timestamp}</span>
                 </div>
@@ -203,7 +203,7 @@ export default function AnalystPage() {
                   }`}
                 >
                   <div className="whitespace-pre-wrap leading-relaxed">{m.text}</div>
-                  {m.sender === 'vortex' && (
+                  {m.sender === 'orion' && (
                     <button
                       onClick={() => handleCopy(m.text)}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-[#0e131d] border border-white/10 text-[var(--text-muted)] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
@@ -251,7 +251,7 @@ export default function AnalystPage() {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={`Ask Gemini about ${activeTicker} order flow, volatility, or targets...`}
+              placeholder={`Ask ORION about ${activeTicker} order flow, volatility, or targets...`}
               className="flex-1 px-4 py-3 rounded-full bg-[#0e131d] border border-white/10 text-xs font-mono text-white placeholder-[var(--text-muted)] focus:outline-none focus:border-[#00ff87]"
             />
             <Button

@@ -1,33 +1,24 @@
-import type { Metadata } from "next";
-import ClientBackgroundWrapper from "@/components/canvas/ClientBackgroundWrapper";
-import { ToastProvider } from "@/components/ui/Toast";
-import { Preloader } from "@/components/layout/Preloader";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
+import ClientBackgroundWrapper from '@/components/canvas/ClientBackgroundWrapper';
+import { ToastProvider } from '@/components/ui/Toast';
 
 export const metadata: Metadata = {
-  title: "VORTEX-HF | Real-Time Market Intelligence",
-  description: "High-frequency telemetry engine with quantitative AI. Real-time order flow, candlestick charts, AI analyst, and market screener.",
+  title: 'ORION | High-Frequency Market Telemetry & Quantitative AI',
+  description: 'Institutional-Grade High-Frequency Market Telemetry & Quantitative AI Engine powered by Gemini.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body
-        className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden bg-[#0a0d14] text-white font-sans antialiased selection:bg-[#00ff87] selection:text-black flex flex-col items-center"
-      >
+    <html lang="en" className="dark">
+      <body className="w-full min-h-screen bg-[#080b11] text-white flex flex-col items-center overflow-x-hidden antialiased">
         <ToastProvider>
-          <Preloader />
           <ClientBackgroundWrapper />
-          <div className="w-full flex-1 flex flex-col items-center">
+          <div className="relative z-10 w-full min-h-screen flex flex-col items-center">
             {children}
           </div>
         </ToastProvider>

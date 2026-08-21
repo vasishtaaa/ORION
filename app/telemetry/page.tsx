@@ -27,25 +27,25 @@ export default function TelemetryPage() {
         {/* Header & KPI Summary Grid */}
         <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
           <MetricCard
-            title="p50 Latency"
+            title="P50 LATENCY"
             value={`${p50.toFixed(0)} μs`}
             subValue="Median"
             icon={<ShieldCheck className="w-4 h-4 text-[#00ff87]" />}
           />
           <MetricCard
-            title="p99 Latency"
+            title="P99 LATENCY"
             value={`${p99.toFixed(0)} μs`}
             subValue="Tail Jitter"
             icon={<Activity className="w-4 h-4 text-cyan-300" />}
           />
           <MetricCard
-            title="Avg Latency"
+            title="AVG LATENCY"
             value={`${avg.toFixed(0)} μs`}
             subValue="Network Mean"
             icon={<Network className="w-4 h-4 text-yellow-300" />}
           />
           <MetricCard
-            title="Throughput"
+            title="THROUGHPUT"
             value={`${throughput.toFixed(0)}`}
             subValue="pkts/s"
             icon={<Zap className="w-4 h-4 text-[#00ff87]" />}
@@ -62,7 +62,7 @@ export default function TelemetryPage() {
 
             <div className="flex justify-between py-2 border-b border-white/5">
               <span className="text-[var(--text-muted)]">Engine Cluster</span>
-              <span className="text-white font-bold">VORTEX-HF-PROD-01</span>
+              <span className="text-white font-bold">ORION-HF-PROD-01</span>
             </div>
             <div className="flex justify-between py-2 border-b border-white/5">
               <span className="text-[var(--text-muted)]">Transport Protocol</span>

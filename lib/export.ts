@@ -1,75 +1,61 @@
-import { VortexSnapshot, ScreenerItem, NewsItem } from './types';
+import { VortexSnapshot, ScreenerItem } from './types';
 
-/**
- * Trigger browser file download from Blob
- */
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
-/**
- * Export live candles and tick history to CSV
- */
 export function exportCandlesToCSV(snapshot: VortexSnapshot) {
-  if (!snapshot || !snapshot.candles) return;
+  if (!snapshot?.candles || snapshot.candles.length === 0) return;
+
   const headers = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume'];
-  const rows = snapshot.candles.map(c => [
-    `"${c.t}"`,
+  const rows = snapshot.candles.map((c) => [
+    c.t,
     c.o.toFixed(2),
     c.h.toFixed(2),
     c.l.toFixed(2),
     c.c.toFixed(2),
-    c.v || 0,
+    (c.v || 0).toString(),
   ]);
 
-  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  downloadBlob(blob, `vortex_${snapshot.ticker}_candles_${new Date().toISOString().slice(0, 10)}.csv`);
+  downloadBlob(blob, `ORION_${snapshot.ticker}_candles_${new Date().toISOString().slice(0, 10)}.csv`);
 }
 
-/**
- * Export Screener Data to CSV
- */
-export function exportScreenerToCSV(screener: ScreenerItem[]) {
-  if (!screener || !screener.length) return;
-  const headers = ['Ticker', 'Name', 'Price (INR)', 'Prev Close', 'Change %', 'RSI', 'Quant Score', 'Signal', 'Volume'];
-  const rows = screener.map(item => [
-    `"${item.ticker}"`,
+export function exportScreenerToCSV(items: ScreenerItem[]) {
+  if (!items || items.length === 0) return;
+
+  const headers = ['Ticker', 'Name', 'Price', 'Change%', 'RSI', 'QuantScore', 'Signal', 'Volume'];
+  const rows = items.map((item) => [
+    item.ticker,
     `"${item.name}"`,
     item.price.toFixed(2),
-    item.prev_close.toFixed(2),
     item.change_pct.toFixed(2),
     item.rsi.toFixed(1),
     item.quant_score.toFixed(3),
     item.recommendation || item.signal || 'HOLD',
-    item.volume,
+    item.volume.toString(),
   ]);
 
-  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  downloadBlob(blob, `vortex_market_screener_${new Date().toISOString().slice(0, 10)}.csv`);
+  downloadBlob(blob, `ORION_Screener_Data.csv`);
 }
 
-/**
- * Export Live Snapshot as JSON
- */
 export function exportSnapshotToJSON(snapshot: VortexSnapshot) {
   if (!snapshot) return;
-  const jsonContent = JSON.stringify(snapshot, null, 2);
-  const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
-  downloadBlob(blob, `vortex_${snapshot.ticker}_snapshot_${Date.now()}.json`);
+  const jsonStr = JSON.stringify(snapshot, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  downloadBlob(blob, `ORION_${snapshot.ticker}_snapshot_${Date.now()}.json`);
 }
 
-/**
- * Print / Save formatted institutional summary report
- */
 export function triggerPrintSummaryReport() {
   if (typeof window !== 'undefined') {
     window.print();

@@ -55,7 +55,7 @@ export default function AppHeader({
       onTickerSelect(formatted);
     }
     if (typeof window !== 'undefined') {
-      localStorage.setItem('vortex_active_ticker', formatted);
+      localStorage.setItem('orion_active_ticker', formatted);
     }
     setSearchOpen(false);
     setSearchQuery('');
@@ -69,18 +69,18 @@ export default function AppHeader({
     <>
       <header className="sticky top-0 z-40 h-16 w-full flex-shrink-0 bg-[#080b11]/90 border-b border-white/10 backdrop-blur-md flex items-center justify-center">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-          {/* Left: Logo & Brand Badge */}
+          {/* Left: ORION Logo with O Monogram & 4.0 Badge */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 no-underline group shrink-0">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#00ff87] to-[#006b3a] flex items-center justify-center font-black text-black text-sm sm:text-base shadow-[0_0_20px_rgba(0,255,135,0.4)] group-hover:scale-105 transition-transform">
-                V
+                O
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-sans font-black text-base sm:text-lg tracking-[2.5px] sm:tracking-[3px] uppercase text-white group-hover:text-[#00ff87] transition-colors">
-                  VORTEX
+                  ORION
                 </span>
-                <span className="w-fit max-w-full inline-flex shrink-0 items-center justify-center px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-[rgba(80,200,120,0.15)] text-[#00ff87] border border-[rgba(80,200,120,0.3)]">
-                  HF-4.0
+                <span className="w-fit max-w-full inline-flex shrink-0 items-center justify-center px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                  4.0
                 </span>
               </div>
             </Link>
@@ -176,7 +176,7 @@ export default function AppHeader({
                   type="button"
                   onClick={() => {
                     if (onTickerSelect) onTickerSelect(t);
-                    if (typeof window !== 'undefined') localStorage.setItem('vortex_active_ticker', t);
+                    if (typeof window !== 'undefined') localStorage.setItem('orion_active_ticker', t);
                     setSearchOpen(false);
                     success(`Switched to ${t}`);
                     router.push('/terminal');

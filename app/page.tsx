@@ -26,18 +26,18 @@ export default function LandingPage() {
 
       <main className="flex-1 w-full flex flex-col items-center">
         {/* Hero Section */}
-        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32 flex flex-col items-center text-center">
+        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 flex flex-col items-center text-center">
           {/* Centered Hero Badge */}
           <div className="inline-flex w-fit mx-auto mb-6 items-center gap-2 px-4 sm:px-5 py-1.5 rounded-full bg-[rgba(80,200,120,0.12)] border border-[rgba(80,200,120,0.3)] text-xs sm:text-sm font-mono text-[#00ff87] font-bold shadow-[0_0_20px_rgba(0,255,135,0.2)]">
             <Sparkles className="w-4 h-4 text-[#00ff87]" />
-            <span>VORTEX 4.0 TELEMETRY ENGINE · SUB-MILLISECOND PRECISION</span>
+            <span>ORION 4.0 TELEMETRY ENGINE · SUB-MILLISECOND PRECISION</span>
           </div>
 
           {/* Centered H1 */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-center max-w-4xl mx-auto leading-tight text-white">
-            Institutional-Grade Market <br className="hidden sm:inline" />
+            ORION MARKET TELEMETRY & <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-              TELEMETRY & AI EDGE
+              QUANTITATIVE AI
             </span>
           </h1>
 
@@ -75,7 +75,7 @@ export default function LandingPage() {
         <MarketRibbon />
 
         {/* Core Pillars Bento Grid Section */}
-        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32">
+        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <BentoGrid />
         </section>
 
@@ -83,7 +83,7 @@ export default function LandingPage() {
         <StatsBar />
 
         {/* Bottom CTA Banner */}
-        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32">
+        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <div className="relative w-full rounded-3xl p-8 sm:p-16 lg:p-20 bg-gradient-to-b from-[#0e1724] to-[#080b11] border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col items-center text-center gap-6">
             {/* Ambient Background Glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 bg-emerald-500/15 rounded-full blur-[100px] pointer-events-none" />

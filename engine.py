@@ -127,8 +127,8 @@ class TelemetryManager:
         self.ws_lock = threading.Lock()
 
         # AI Agent state variables
-        self.ai_agent_status = "VORTEX_AI_ONLINE"
-        self.ai_agent_news = "VORTEX AI initializing technical analysis engine..."
+        self.ai_agent_status = "ORION_AI_ONLINE"
+        self.ai_agent_news = "ORION AI initializing technical analysis engine..."
         self.ai_agent_sentiment = 0.0
         self.ai_agent_confidence = 70.0
         self.ai_agent_target = 0.0
@@ -908,7 +908,7 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
             if self.path == '/' or self.path.startswith('/health'):
                 data = {
                     'status': 'ONLINE',
-                    'service': 'VORTEX-HF Telemetry Engine',
+                    'service': 'ORION-HF Telemetry Engine',
                     'version': '4.0.0',
                     'active_ticker': getattr(telemetry_mgr, 'active_ticker', 'TCS_NSE') if telemetry_mgr else 'TCS_NSE',
                     'tickers_tracked': len(telemetry_mgr.books) if telemetry_mgr else 0,

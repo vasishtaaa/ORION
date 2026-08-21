@@ -40,17 +40,17 @@ export function TerminalMockup() {
           </div>
         </div>
 
-        {/* Mockup Metric Cards Row */}
+        {/* Mockup Metric Cards Row with unclipped labels */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {[
             { label: 'LAST PRICE', val: '₹2,980.50', chg: '+1.20%', icon: <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> },
-            { label: 'MODEL TARGET', val: '₹3,085.00', chg: '88% Conf.', icon: <TrendingUp className="w-3.5 h-3.5 text-[#00ff87]" /> },
+            { label: 'TARGET PRICE', val: '₹3,085.00', chg: '88% Conf.', icon: <TrendingUp className="w-3.5 h-3.5 text-[#00ff87]" /> },
             { label: 'THROUGHPUT', val: '12,450 p/s', chg: 'Real-time', icon: <Zap className="w-3.5 h-3.5 text-cyan-400" /> },
             { label: 'ORDER FLOW LATENCY', val: '520 μs', chg: 'p50 Index', icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> },
           ].map((m, i) => (
             <div key={i} className="p-3.5 sm:p-4 rounded-xl bg-[#0e131d]/90 border border-white/5 flex flex-col justify-between gap-2">
               <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)]">
-                <span className="w-fit px-2 py-0.5 rounded-md bg-black/30 border border-white/5">{m.label}</span>
+                <span className="w-fit px-3 py-1 rounded-md bg-black/30 border border-white/5 font-semibold">{m.label}</span>
                 {m.icon}
               </div>
               <div className="flex items-baseline justify-between gap-1 mt-1">

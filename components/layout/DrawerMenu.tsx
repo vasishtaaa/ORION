@@ -48,7 +48,7 @@ export function DrawerMenu({ isOpen, onClose, currentPath = '/', activeTicker, o
     const clean = search.trim().toUpperCase();
     const formatted = clean.includes('_') ? clean : `${clean}_NSE`;
     if (onTickerSelect) onTickerSelect(formatted);
-    if (typeof window !== 'undefined') localStorage.setItem('vortex_active_ticker', formatted);
+    if (typeof window !== 'undefined') localStorage.setItem('orion_active_ticker', formatted);
     setSearch('');
     onClose();
     success(`Switched active ticker to ${formatted}`);
@@ -68,18 +68,18 @@ export function DrawerMenu({ isOpen, onClose, currentPath = '/', activeTicker, o
       {/* Slide-over Drawer Body */}
       <div className="relative z-10 w-full max-w-sm sm:max-w-md h-full bg-[#080b11] border-l border-white/10 p-6 sm:p-8 flex flex-col justify-between shadow-[0_0_60px_rgba(0,0,0,0.95)] animate-in slide-in-from-right duration-250 overflow-y-auto">
         <div className="flex flex-col gap-6">
-          {/* Drawer Header */}
+          {/* Drawer Header with ORION branding */}
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#00ff87] to-[#006b3a] flex items-center justify-center font-black text-black text-sm">
-                V
+                O
               </div>
-              <div className="flex flex-col">
+              <div className="flex items-center gap-2">
                 <span className="font-sans font-black text-sm tracking-[2px] uppercase text-white">
-                  VORTEX<span className="text-[#00ff87]">-HF</span>
+                  ORION
                 </span>
-                <span className="text-[9px] font-mono text-[var(--text-muted)] tracking-wider">
-                  TELEMETRY ENGINE 4.0
+                <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                  4.0
                 </span>
               </div>
             </div>
@@ -158,7 +158,7 @@ export function DrawerMenu({ isOpen, onClose, currentPath = '/', activeTicker, o
           <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)] px-2">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#00ff87] animate-pulse" />
-              <span className="text-emerald-400 font-semibold">Binary Stream Active</span>
+              <span className="text-emerald-400 font-semibold">ORION Stream Active</span>
             </div>
             <span>v4.0</span>
           </div>

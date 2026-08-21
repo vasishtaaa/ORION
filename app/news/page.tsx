@@ -55,25 +55,25 @@ export default function NewsPage() {
         {/* Header & KPI Summary Grid */}
         <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
           <MetricCard
-            title="Total Wire Feeds"
+            title="TOTAL FEEDS"
             value={news.length || 81}
-            subValue="Live RSS"
+            subValue="Live Wire"
             icon={<Radio className="w-4 h-4" />}
           />
           <MetricCard
-            title="Bullish Tone"
+            title="BULLISH TONE"
             value={bullishCount || 48}
             subValue="Headlines"
             icon={<TrendingUp className="w-4 h-4 text-[#00ff87]" />}
           />
           <MetricCard
-            title="Bearish Tone"
+            title="BEARISH TONE"
             value={bearishCount || 14}
             subValue="Headlines"
             icon={<TrendingDown className="w-4 h-4 text-red-400" />}
           />
           <MetricCard
-            title="Publishers"
+            title="PUBLISHERS"
             value="12"
             subValue="Wire Outlets"
             icon={<Globe2 className="w-4 h-4" />}
@@ -84,7 +84,7 @@ export default function NewsPage() {
         <div className="w-full p-5 sm:p-6 rounded-2xl bg-[#0e131d]/90 border border-white/10 flex flex-wrap items-center justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
           <div className="flex flex-col gap-1">
             <h1 className="text-lg sm:text-2xl font-mono font-bold text-white tracking-wider flex items-center gap-2">
-              FINANCIAL INTELLIGENCE WIRE
+              ORION FINANCIAL INTELLIGENCE WIRE
             </h1>
             <p className="text-xs sm:text-sm font-mono text-[var(--text-secondary)]">
               Scraping Reuters, Bloomberg, Economic Times, Mint, Moneycontrol
