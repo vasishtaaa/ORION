@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { StatusBadge } from '@/components/ui/Badges';
 import { DrawerMenu } from './DrawerMenu';
 import { useToast } from '@/components/ui/Toast';
-import { Search, Menu, Volume2, VolumeX, ArrowRight } from 'lucide-react';
+import { Search, Menu, Volume2, VolumeX } from 'lucide-react';
 import { toggleAudio, isAudioEnabled } from '@/lib/audio';
 
 interface AppHeaderProps {
@@ -14,14 +14,6 @@ interface AppHeaderProps {
   currentPath?: string;
   onTickerSelect?: (ticker: string) => void;
 }
-
-const NAV_LINKS = [
-  { href: '/terminal', label: 'Platform' },
-  { href: '/analyst', label: 'AI Analyst', badge: 'GEMINI' },
-  { href: '/screener', label: 'Screener' },
-  { href: '/news', label: 'News Wire' },
-  { href: '/telemetry', label: 'Performance' },
-];
 
 export default function AppHeader({
   wsStatus,
@@ -75,8 +67,8 @@ export default function AppHeader({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 w-full backdrop-blur-md bg-[#0a0d14]/80 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] flex justify-center">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      <header className="fixed top-0 left-0 right-0 z-40 w-full backdrop-blur-md bg-[#0a0d14]/85 border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)] flex justify-center">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
           {/* Left: Logo & Brand */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 no-underline group flex-shrink-0">
@@ -99,69 +91,61 @@ export default function AppHeader({
             </Link>
           </div>
 
-          {/* Center: Navigation Links (Desktop) */}
-          <div className="hidden lg:flex items-center gap-1 justify-center max-w-2xl mx-auto">
-            <nav className="flex items-center gap-1">
-              {NAV_LINKS.map((link) => {
-                const isActive = currentPath === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
-                      isActive
-                        ? 'bg-[rgba(80,200,120,0.18)] text-[#00ff87] border border-[rgba(80,200,120,0.35)] shadow-[0_0_12px_rgba(0,255,135,0.15)]'
-                        : 'text-[var(--text-secondary)] hover:text-white hover:bg-[rgba(80,200,120,0.06)]'
-                    }`}
-                  >
-                    <span>{link.label}</span>
-                    {link.badge && (
-                      <span className="text-[9px] px-1 py-0.2 rounded bg-[#00ff87]/20 text-[#00ff87] font-bold">
-                        {link.badge}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
+          {/* Right: Search Input (⌘K), Audio, Stream Status & Hamburger Menu Button */}
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+            {/* Search Combobox Button (Desktop) */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="hidden sm:flex items-center justify-between px-3 py-1.5 rounded-xl bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group w-44 md:w-56"
+            >
+              <div className="flex items-center gap-2 truncate">
+                <Search className="w-3.5 h-3.5 text-[var(--matrix)] group-hover:text-[#00ff87]" />
+                <span className="truncate">Search ticker...</span>
+              </div>
+              <kbd className="px-1.5 py-0.5 rounded bg-black/40 border border-white/10 text-[10px] text-[#00ff87] font-mono">
+                ⌘K
+              </kbd>
+            </button>
 
-          {/* Right: Status Indicator & Launch Terminal Primary CTA */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Audio Toggle */}
+            {/* Search Icon button (Mobile only) */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="sm:hidden p-2 rounded-xl bg-[#0e131d] border border-white/10 text-[var(--text-secondary)] hover:text-white cursor-pointer"
+              title="Search ticker"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+
+            {/* Audio Acoustic Telemetry Toggle */}
             <button
               type="button"
               onClick={handleAudioToggle}
-              className={`p-2 rounded-xl border transition-all cursor-pointer hidden sm:flex ${
+              className={`p-2 rounded-xl border transition-all cursor-pointer hidden md:flex ${
                 audioActive
                   ? 'bg-[#002413] text-[#00ff87] border-[#00ff87]/40 shadow-[0_0_12px_rgba(0,255,135,0.2)]'
                   : 'bg-[#0e131d] text-[var(--text-muted)] border-white/10 hover:text-white'
               }`}
-              title={audioActive ? 'Mute acoustic audio' : 'Enable acoustic audio'}
+              title={audioActive ? 'Mute acoustic telemetry audio' : 'Enable acoustic telemetry audio'}
             >
               {audioActive ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
 
-            {/* Status Badge */}
+            {/* Stream Active Indicator */}
             <StatusBadge status={wsStatus} />
 
-            {/* High-Contrast Primary CTA Button */}
-            <Link
-              href="/terminal"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#50C878] text-black font-mono font-bold text-xs hover:bg-[#00ff87] shadow-[0_0_20px_rgba(80,200,120,0.35)] hover:shadow-[0_0_30px_rgba(0,255,135,0.6)] transition-all cursor-pointer active:scale-95"
-            >
-              <span>Launch Terminal</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-
-            {/* Mobile Hamburger Drawer Trigger (< 1024px) */}
+            {/* Sliding Drawer Hamburger Toggle Button (Universal across all viewports) */}
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="lg:hidden p-2 rounded-xl bg-[#0e131d] border border-white/10 text-[var(--text-primary)] hover:text-[#00ff87] cursor-pointer"
+              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-[#0e131d] hover:bg-[#141b29] border border-white/10 hover:border-[#50C878] text-[var(--text-primary)] hover:text-[#00ff87] transition-all cursor-pointer flex items-center gap-2 shadow-sm"
               aria-label="Open Navigation Menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5 text-[#00ff87]" />
+              <span className="hidden sm:inline font-mono font-bold text-xs tracking-wider uppercase">
+                Menu
+              </span>
             </button>
           </div>
         </div>
@@ -212,7 +196,7 @@ export default function AppHeader({
         </div>
       )}
 
-      {/* Slide-out Mobile Drawer Menu */}
+      {/* Sliding Slide-over Navigation Drawer */}
       <DrawerMenu
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
