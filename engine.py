@@ -1386,7 +1386,7 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
 
 def main():
     print("=" * 80)
-    print("      VORTEX-HF TELEMETRY ENGINE - REAL-TIME MARKET INTERFACE")
+    print("       ORION TELEMETRY ENGINE & QUANTITATIVE AI INTERFACE")
     print("=" * 80)
     
     telemetry_mgr = TelemetryManager()
@@ -1401,13 +1401,11 @@ def main():
     
     http_port = int(os.getenv('PORT', 8000))
     ws_port = int(os.getenv('WS_PORT', 8001))
-    
-    os.makedirs('web', exist_ok=True)
 
-    # 1. Spawn HTTP static & API web server
+    # 1. Spawn Unified HTTP static & API web server
     http_thread = threading.Thread(
         target=start_http_server, 
-        args=(http_port, 'web', telemetry_mgr),
+        args=(http_port, 'out', telemetry_mgr),
         daemon=True
     )
     http_thread.start()

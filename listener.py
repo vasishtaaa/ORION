@@ -1,6 +1,6 @@
 """
-Vortex-HF High-Frequency Telemetry Engine - Entrypoint Wrapper.
-Imports and executes the core service from engine.py.
+ORION High-Frequency Telemetry Engine - Entrypoint Wrapper.
+Imports and executes the core unified service from engine.py.
 """
 import multiprocessing
 from engine import main
