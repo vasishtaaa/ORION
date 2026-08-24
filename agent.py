@@ -10,6 +10,8 @@ Components:
   - VortexAgent        : Orchestrator — integrates all components
 """
 
+import os
+import sys
 import threading
 import time
 import math
@@ -19,6 +21,13 @@ import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
 from collections import deque
+
+# Reconfigure stdout for UTF-8 on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 
 # ── Configuration ──────────────────────────────────────────────────────
 OLLAMA_MODEL = 'deepseek-r1:8b'       # Installed model — check with `ollama list`
