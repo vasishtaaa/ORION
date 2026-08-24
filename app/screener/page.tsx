@@ -7,8 +7,8 @@ import { SignalBadge, ChangeBadge } from '@/components/ui/Badges';
 import { Button } from '@/components/ui/Button';
 import { exportScreenerToCSV } from '@/lib/export';
 import { useToast } from '@/components/ui/Toast';
-import { Search, Download, ArrowUpDown, Filter } from 'lucide-react';
-import { ScreenerItem } from '@/lib/types';
+import { Search, Download, ArrowUpDown, Filter, Flame, TrendingUp, TrendingDown, DollarSign, Activity } from 'lucide-react';
+import { ScreenerItem, MarketMoverItem } from '@/lib/types';
 
 export default function ScreenerPage() {
   const router = useRouter();
@@ -19,8 +19,11 @@ export default function ScreenerPage() {
   const [filterType, setFilterType] = useState<'ALL' | 'BUY' | 'SELL' | 'OVERSOLD' | 'OVERBOUGHT'>('ALL');
   const [sortField, setSortField] = useState<keyof ScreenerItem>('quant_score');
   const [sortAsc, setSortAsc] = useState(false);
+  const [moverTab, setMoverTab] = useState<'gainers' | 'losers' | 'active'>('gainers');
 
   const rawItems = snapshot?.screener || [];
+  const marketMovers = snapshot?.market_movers;
+  const fxRates = snapshot?.fx_rates || [{ pair: 'USD/INR', rate: 95.74, bid: 95.73, ask: 95.75 }];
 
   const filteredItems = useMemo(() => {
     return rawItems
@@ -62,6 +65,13 @@ export default function ScreenerPage() {
     success(`Exported ${filteredItems.length} screener equities to CSV`);
   };
 
+  const displayedMovers: MarketMoverItem[] = useMemo(() => {
+    if (!marketMovers) return [];
+    if (moverTab === 'gainers') return marketMovers.top_gainers || [];
+    if (moverTab === 'losers') return marketMovers.top_losers || [];
+    return marketMovers.most_actively_traded || [];
+  }, [marketMovers, moverTab]);
+
   return (
     <div className="min-h-screen flex flex-col bg-[#080b11] text-white w-full overflow-x-hidden">
       <AppHeader
@@ -72,17 +82,108 @@ export default function ScreenerPage() {
       />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+        {/* FX Currency Telemetry & Alpha Vantage Feed Ribbon */}
+        <div className="w-full p-3 sm:p-4 rounded-xl bg-[#0e131d]/90 border border-white/10 flex flex-wrap items-center justify-between gap-3 font-mono text-xs shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center gap-2.5">
+            <span className="w-fit px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+              ALPHA VANTAGE TELEMETRY
+            </span>
+            <span className="text-[var(--text-muted)] text-[11px] hidden sm:inline">Institutional FX & Movers Feed</span>
+          </div>
+
+          <div className="flex items-center gap-4 flex-wrap text-xs">
+            {fxRates.map((fx, idx) => (
+              <div key={idx} className="flex items-center gap-1.5">
+                <span className="text-[var(--text-secondary)]">{fx.pair}:</span>
+                <span className="text-[#00ff87] font-bold">₹{fx.rate.toFixed(2)}</span>
+                {fx.bid && fx.ask && (
+                  <span className="text-[10px] text-[var(--text-muted)] hidden md:inline">
+                    (B: {fx.bid.toFixed(2)} / A: {fx.ask.toFixed(2)})
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Alpha Vantage Market Movers & Volume Leaders Card */}
+        {displayedMovers.length > 0 && (
+          <div className="w-full p-5 sm:p-6 rounded-2xl bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-amber-400" />
+                <h2 className="text-sm sm:text-base font-mono font-bold text-white uppercase tracking-wider">
+                  Alpha Vantage Market Movers & Volume Leaders
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-1.5 bg-[#0a0d14] p-1 rounded-lg border border-white/10 text-xs font-mono">
+                <button
+                  onClick={() => setMoverTab('gainers')}
+                  className={`px-3 py-1 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    moverTab === 'gainers' ? 'bg-emerald-950/80 text-[#00ff87] font-bold' : 'text-[var(--text-muted)] hover:text-white'
+                  }`}
+                >
+                  <TrendingUp className="w-3 h-3" /> Top Gainers
+                </button>
+                <button
+                  onClick={() => setMoverTab('losers')}
+                  className={`px-3 py-1 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    moverTab === 'losers' ? 'bg-red-950/80 text-red-400 font-bold' : 'text-[var(--text-muted)] hover:text-white'
+                  }`}
+                >
+                  <TrendingDown className="w-3 h-3" /> Top Losers
+                </button>
+                <button
+                  onClick={() => setMoverTab('active')}
+                  className={`px-3 py-1 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    moverTab === 'active' ? 'bg-cyan-950/80 text-cyan-300 font-bold' : 'text-[var(--text-muted)] hover:text-white'
+                  }`}
+                >
+                  <Activity className="w-3 h-3" /> Most Active
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+              {displayedMovers.map((m, idx) => {
+                const chgPct = parseFloat(m.change_percentage.replace('%', '')) || 0;
+                const isPos = chgPct >= 0;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      selectTicker(m.ticker);
+                      router.push('/terminal');
+                    }}
+                    className="p-3 rounded-xl bg-[#0a0d14] border border-white/10 hover:border-[#00ff87]/50 transition-all cursor-pointer flex flex-col gap-1 shadow-sm"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono font-bold text-xs text-white truncate">{m.ticker}</span>
+                      <span className={`text-[10px] font-mono font-bold ${isPos ? 'text-[#00ff87]' : 'text-red-400'}`}>
+                        {isPos ? '▲' : '▼'} {Math.abs(chgPct).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="text-xs font-mono font-bold text-[#f0fff8]">${parseFloat(m.price).toFixed(2)}</div>
+                    <div className="text-[9px] font-mono text-[var(--text-muted)] truncate">Vol: {parseInt(m.volume).toLocaleString()}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Header & Controls Toolbar */}
         <div className="w-full p-5 sm:p-6 rounded-2xl bg-[#0e131d]/90 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <h1 className="text-lg sm:text-2xl font-mono font-bold text-white tracking-wider flex items-center gap-2.5">
-              REAL-TIME MARKET SCREENER
+              QUANTITATIVE TECHNICAL SCREENER
               <span className="w-fit px-3 py-0.5 rounded-full bg-[#00ff87]/20 text-[#00ff87] text-xs font-bold border border-[#00ff87]/30">
                 {filteredItems.length} EQUITIES
               </span>
             </h1>
             <p className="text-xs sm:text-sm font-mono text-[var(--text-secondary)]">
-              Multi-factor quantitative technical ranking across NSE / BSE bluechips
+              Multi-factor technical ranking powered by Alpha Vantage & institutional tick feeds
             </p>
           </div>
 

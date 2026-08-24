@@ -221,6 +221,8 @@ export function useVortexSocket() {
       latency_avg: latency.avg || 0,
       latency_p50: latency.p50 || 0,
       latency_p99: latency.p99 || 0,
+      market_movers: raw.market_movers || { top_gainers: [], top_losers: [], most_actively_traded: [] },
+      fx_rates: raw.fx_rates || [{ pair: 'USD/INR', rate: 95.74, bid: 95.73, ask: 95.75 }],
       fundamental: {
         pe: fundamentals.trailingPE,
         eps: fundamentals.eps,

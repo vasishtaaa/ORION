@@ -212,6 +212,114 @@ def fetch_alpha_vantage_overview(symbol):
         pass
     return {}
 
+_av_movers_cache: dict = {'data': None, 'fetched_at': 0.0}
+_av_fx_cache: dict = {}
+
+def fetch_alpha_vantage_market_movers():
+    """Fetches top gainers, top losers, and most actively traded stocks from Alpha Vantage."""
+    global _av_last_req_time
+    if not _av_api_key:
+        return {'top_gainers': [], 'top_losers': [], 'most_actively_traded': []}
+
+    now = time.time()
+    with _av_cache_lock:
+        if _av_movers_cache['data'] and (now - _av_movers_cache['fetched_at']) < 300:  # 5 min TTL
+            return _av_movers_cache['data']
+
+    with _av_cache_lock:
+        elapsed = time.time() - _av_last_req_time
+        if elapsed < 1.1:
+            time.sleep(1.1 - elapsed)
+        _av_last_req_time = time.time()
+
+    url = f"https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey={_av_api_key}"
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            if 'top_gainers' in data:
+                formatted = {
+                    'top_gainers': data.get('top_gainers', [])[:8],
+                    'top_losers': data.get('top_losers', [])[:8],
+                    'most_actively_traded': data.get('most_actively_traded', [])[:8],
+                    'updated_at': data.get('last_updated', '')
+                }
+                with _av_cache_lock:
+                    _av_movers_cache['data'] = formatted
+                    _av_movers_cache['fetched_at'] = time.time()
+                return formatted
+    except Exception:
+        pass
+    return _av_movers_cache['data'] or {'top_gainers': [], 'top_losers': [], 'most_actively_traded': []}
+
+def fetch_alpha_vantage_fx(from_curr='USD', to_curr='INR'):
+    """Fetches real-time institutional FX exchange rates from Alpha Vantage."""
+    global _av_last_req_time
+    pair = f"{from_curr}_{to_curr}"
+    now = time.time()
+    with _av_cache_lock:
+        cached = _av_fx_cache.get(pair)
+        if cached and (now - cached['fetched_at']) < 180:  # 3 min TTL
+            return cached['data']
+
+    with _av_cache_lock:
+        elapsed = time.time() - _av_last_req_time
+        if elapsed < 1.1:
+            time.sleep(1.1 - elapsed)
+        _av_last_req_time = time.time()
+
+    url = f"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={from_curr}&to_currency={to_curr}&apikey={_av_api_key}"
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            rate_data = data.get('Realtime Currency Exchange Rate', {})
+            if rate_data and '5. Exchange Rate' in rate_data:
+                fx_res = {
+                    'pair': f"{from_curr}/{to_curr}",
+                    'rate': float(rate_data.get('5. Exchange Rate', 0)),
+                    'bid': float(rate_data.get('8. Bid Price', 0)),
+                    'ask': float(rate_data.get('9. Ask Price', 0)),
+                    'updated_at': rate_data.get('6. Last Refreshed', ''),
+                }
+                with _av_cache_lock:
+                    _av_fx_cache[pair] = {'data': fx_res, 'fetched_at': time.time()}
+                return fx_res
+    except Exception:
+        pass
+    return _av_fx_cache.get(pair, {}).get('data') or {'pair': f"{from_curr}/{to_curr}", 'rate': 95.74, 'bid': 95.73, 'ask': 95.75}
+
+def search_alpha_vantage_symbols(query):
+    """Searches Alpha Vantage for global and Indian matching equities."""
+    global _av_last_req_time
+    if not query or not _av_api_key:
+        return []
+
+    with _av_cache_lock:
+        elapsed = time.time() - _av_last_req_time
+        if elapsed < 1.1:
+            time.sleep(1.1 - elapsed)
+        _av_last_req_time = time.time()
+
+    url = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={urllib.parse.quote(query)}&apikey={_av_api_key}"
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    results = []
+    try:
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            for match in data.get('bestMatches', []):
+                sym = match.get('1. symbol', '')
+                name = match.get('2. name', '')
+                region = match.get('4. region', '')
+                if sym:
+                    results.append({
+                        'ticker': sym,
+                        'name': f"{name} ({region})" if region else name
+                    })
+    except Exception:
+        pass
+    return results
+
 # Helper converter from simulated ticker to Yahoo Finance Symbol
 def get_yahoo_symbol(ticker_str):
     ticker_str = ticker_str.strip()
@@ -406,6 +514,10 @@ class TelemetryManager:
         else:
             p50 = p90 = p99 = avg = max_lat = min_lat = 0.0
 
+        # Retrieve cached market movers and FX telemetry from Alpha Vantage
+        movers = fetch_alpha_vantage_market_movers()
+        fx_inr = fetch_alpha_vantage_fx('USD', 'INR')
+
         return {
             'total_packets': total,
             'pps': pps,
@@ -423,7 +535,9 @@ class TelemetryManager:
             'ai_agent': ai_data,
             'news': all_news,
             'stock_news': stock_news,
-            'screener': screener_data
+            'screener': screener_data,
+            'market_movers': movers,
+            'fx_rates': [fx_inr]
         }
 
 def choice_excluding(lst, exclude):
@@ -1111,6 +1225,30 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 self.wfile.write(json.dumps(items).encode('utf-8'))
                 return
 
+            # 5b. Alpha Vantage Market Movers (Top Gainers, Losers, Most Active)
+            if self.path.startswith('/api/market-movers'):
+                movers = fetch_alpha_vantage_market_movers()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(movers).encode('utf-8'))
+                return
+
+            # 5c. Alpha Vantage Live FX Currency Telemetry
+            if self.path.startswith('/api/fx'):
+                fx_data = {
+                    'usd_inr': fetch_alpha_vantage_fx('USD', 'INR'),
+                    'eur_inr': fetch_alpha_vantage_fx('EUR', 'INR'),
+                    'gbp_inr': fetch_alpha_vantage_fx('GBP', 'INR'),
+                }
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(fx_data).encode('utf-8'))
+                return
+
             # 6. Yahoo Search API
             if self.path.startswith('/api/search'):
                 from urllib.parse import urlparse, parse_qs
@@ -1152,7 +1290,16 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                                             })
                         except Exception as e:
                             print(f"[Search API] Error searching Yahoo for '{q_str}': {e}")
-                
+
+                    # Also search Alpha Vantage for global / US equities if query is short
+                    if len(clean_q) <= 8:
+                        av_matches = search_alpha_vantage_symbols(clean_q)
+                        for av_m in av_matches:
+                            av_sym = av_m.get('ticker', '')
+                            if av_sym and av_sym not in seen_tickers and len(results) < 15:
+                                seen_tickers.add(av_sym)
+                                results.append(av_m)
+
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')

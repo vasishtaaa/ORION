@@ -22,6 +22,29 @@ export interface ScreenerItem {
   confidence?: number;
 }
 
+export interface MarketMoverItem {
+  ticker: string;
+  price: string;
+  change_amount: string;
+  change_percentage: string;
+  volume: string;
+}
+
+export interface MarketMovers {
+  top_gainers: MarketMoverItem[];
+  top_losers: MarketMoverItem[];
+  most_actively_traded: MarketMoverItem[];
+  updated_at?: string;
+}
+
+export interface FxRate {
+  pair: string;
+  rate: number;
+  bid?: number;
+  ask?: number;
+  updated_at?: string;
+}
+
 export interface NewsItem {
   headline: string;
   source: string;
@@ -69,6 +92,8 @@ export interface VortexSnapshot {
   latency_p50: number;
   latency_p99: number;
   fundamental?: Fundamentals;
+  market_movers?: MarketMovers;
+  fx_rates?: FxRate[];
 }
 
 export interface PresetBasket {
