@@ -1428,7 +1428,10 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
             self.end_headers()
             self.wfile.write(b"<h1>404 - Page Not Found</h1>")
 
-    class SilentTCPServer(socketserver.TCPServer):
+    class SilentTCPServer(socketserver.ThreadingTCPServer):
+        daemon_threads = True
+        allow_reuse_address = True
+        
         def handle_error(self, request, client_address):
             import sys
             exc_type, _, _ = sys.exc_info()
@@ -1437,7 +1440,6 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
             else:
                 super().handle_error(request, client_address)
 
-    socketserver.TCPServer.allow_reuse_address = True
     try:
         with SilentTCPServer(("", port), CustomHTTPHandler) as httpd:
             print(f"[HTTP Server] Hosting UI assets at http://localhost:{port}")
