@@ -94,6 +94,124 @@ def get_fundamentals(y_symbol: str) -> dict:
     return DEFAULT_FUNDAMENTALS.get(y_symbol, {})
 
 
+# ── Alpha Vantage API Integration ─────────────────────────────────────────────
+_av_api_key = os.environ.get('ALPHA_VANTAGE_API_KEY', '8Y9DH2M334T2KXBG')
+if os.path.exists('.env'):
+    try:
+        with open('.env', 'r', encoding='utf-8') as ef:
+            for line in ef:
+                if line.startswith('ALPHA_VANTAGE_API_KEY='):
+                    _av_api_key = line.split('=', 1)[1].strip()
+    except Exception:
+        pass
+
+_av_quote_cache: dict = {}
+_av_overview_cache: dict = {}
+_av_cache_lock = threading.Lock()
+_av_last_req_time = 0.0
+_AV_TTL = 45  # 45 seconds TTL for live quotes
+
+def get_alpha_vantage_symbol(ticker_str):
+    """Maps internal or simulated ticker strings to Alpha Vantage compatible symbols."""
+    ticker_str = ticker_str.strip()
+    if '_' not in ticker_str:
+        return ticker_str.upper()
+    base, exch = ticker_str.split('_', 1)
+    if base == 'RELI':
+        base = 'RELIANCE'
+    elif base == 'HDFC':
+        base = 'HDFCBANK'
+    elif base == 'TATAMOTORS':
+        base = 'TMCV'
+    # Alpha Vantage indexes Indian equities on BSE (.BSE)
+    return f"{base}.BSE"
+
+def fetch_alpha_vantage_quote(symbol):
+    """Fetches real-time quote for symbol from Alpha Vantage with caching and rate-limiting."""
+    global _av_last_req_time
+    if not _av_api_key:
+        return None
+
+    with _av_cache_lock:
+        cached = _av_quote_cache.get(symbol)
+        if cached and (time.time() - cached['fetched_at']) < _AV_TTL:
+            return cached['data']
+
+    # Rate limiting: minimum 1.1s between outgoing requests
+    with _av_cache_lock:
+        elapsed = time.time() - _av_last_req_time
+        if elapsed < 1.1:
+            time.sleep(1.1 - elapsed)
+        _av_last_req_time = time.time()
+
+    url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={urllib.parse.quote(symbol)}&apikey={_av_api_key}"
+    req = urllib.request.Request(
+        url,
+        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            gq = data.get('Global Quote', {})
+            if gq and '05. price' in gq:
+                quote_data = {
+                    'symbol': gq.get('01. symbol', symbol),
+                    'open': float(gq.get('02. open', 0)),
+                    'high': float(gq.get('03. high', 0)),
+                    'low': float(gq.get('04. low', 0)),
+                    'price': float(gq.get('05. price', 0)),
+                    'volume': int(float(gq.get('06. volume', 0))),
+                    'prev_close': float(gq.get('08. previous close', 0)),
+                    'change': float(gq.get('09. change', 0)),
+                    'change_pct': float(gq.get('10. change percent', '0%').replace('%', '')),
+                }
+                with _av_cache_lock:
+                    _av_quote_cache[symbol] = {'data': quote_data, 'fetched_at': time.time()}
+                return quote_data
+    except Exception:
+        pass
+    return None
+
+def fetch_alpha_vantage_overview(symbol):
+    """Fetches company overview / fundamentals from Alpha Vantage."""
+    global _av_last_req_time
+    if not _av_api_key:
+        return {}
+
+    with _av_cache_lock:
+        cached = _av_overview_cache.get(symbol)
+        if cached and (time.time() - cached['fetched_at']) < 3600:  # 1 hour TTL
+            return cached['data']
+
+    with _av_cache_lock:
+        elapsed = time.time() - _av_last_req_time
+        if elapsed < 1.1:
+            time.sleep(1.1 - elapsed)
+        _av_last_req_time = time.time()
+
+    url = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={urllib.parse.quote(symbol)}&apikey={_av_api_key}"
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            if data and 'Symbol' in data:
+                fundamentals = {
+                    'trailingPE': float(data.get('PERatio') or 22.0),
+                    'eps': float(data.get('EPS') or 0.0),
+                    'marketCap': float(data.get('MarketCapitalization') or 500000000000),
+                    'dividendYield': float(data.get('DividendYield') or 0.0),
+                    'beta': float(data.get('Beta') or 1.0),
+                    'returnOnEquity': float(data.get('ReturnOnEquityTTM') or 0.15),
+                    'revenueGrowth': float(data.get('QuarterlyRevenueGrowthYOY') or 0.08),
+                    'longName': data.get('Name') or symbol,
+                }
+                with _av_cache_lock:
+                    _av_overview_cache[symbol] = {'data': fundamentals, 'fetched_at': time.time()}
+                return fundamentals
+    except Exception:
+        pass
+    return {}
+
 # Helper converter from simulated ticker to Yahoo Finance Symbol
 def get_yahoo_symbol(ticker_str):
     ticker_str = ticker_str.strip()
@@ -372,11 +490,29 @@ def fetch_single_ticker(ticker, telemetry_mgr, active):
                         'volume': volumes[i] if (i < len(volumes) and volumes[i] is not None) else 0
                     })
             
+            # Check Alpha Vantage for live institutional quote
+            av_symbol = get_alpha_vantage_symbol(ticker)
+            av_quote = fetch_alpha_vantage_quote(av_symbol) if av_symbol else None
+            if av_quote and av_quote.get('price', 0) > 0:
+                price = av_quote['price']
+                if av_quote.get('prev_close', 0) > 0:
+                    prev_close = av_quote['prev_close']
+                if av_quote.get('open', 0) > 0 and opens:
+                    opens[0] = av_quote['open']
+                if av_quote.get('high', 0) > 0:
+                    highs = [max(max(highs) if highs else price, av_quote['high'])]
+                if av_quote.get('low', 0) > 0:
+                    lows = [min(min(lows) if lows else price, av_quote['low'])]
+
             # Increment processed packets by number of data points
             telemetry_mgr.record_query_latency(latency_us, len(timestamps) or 1)
             
             # Fetch fundamentals from cache (triggers background refresh if stale)
             fundamentals = get_fundamentals(y_symbol)
+            if av_symbol:
+                av_overview = fetch_alpha_vantage_overview(av_symbol)
+                if av_overview:
+                    fundamentals.update({k: v for k, v in av_overview.items() if v})
             
             # Resolve company long name from fundamentals > chart meta > fallback
             long_name = (
@@ -1083,7 +1219,7 @@ def main():
         daemon=True
     )
     poller_thread.start()
-    print("[Ingestion Engine] Yahoo Finance Poller thread launched.")
+    print("[Ingestion Engine] Alpha Vantage + Yahoo Finance Hybrid Poller thread launched.")
 
     # 3. Spawn VORTEX AI Predictor Agent Thread
     ai_thread = threading.Thread(
