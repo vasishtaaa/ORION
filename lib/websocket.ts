@@ -3,13 +3,14 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { VortexSnapshot, Candle, ScreenerItem, NewsItem } from './types';
 
 const getWsUrl = () => {
-  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_VORTEX_WS_URL) {
-    return process.env.NEXT_PUBLIC_VORTEX_WS_URL;
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_ORION_WS_URL) {
+    return process.env.NEXT_PUBLIC_ORION_WS_URL;
   }
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return process.env.NEXT_PUBLIC_VORTEX_WS_URL || 'wss://vortex-backend-1pf6.onrender.com';
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}/ws`;
   }
-  return 'ws://localhost:8001';
+  return 'ws://localhost:8000/ws';
 };
 
 const RECONNECT_DELAY = 4000;

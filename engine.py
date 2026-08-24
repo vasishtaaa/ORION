@@ -1154,8 +1154,8 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                                 pass
                     return
 
-            # 2. Health check / Root status endpoint
-            if self.path == '/' or self.path.startswith('/health'):
+            # 2. Health check endpoint
+            if self.path == '/health' or self.path.startswith('/api/health'):
                 data = {
                     'status': 'ONLINE',
                     'service': 'ORION-HF Telemetry Engine',
@@ -1197,7 +1197,7 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 cmd_text = params.get('q', params.get('cmd', ['HELP']))[0]
                 active_t = params.get('ticker', [getattr(telemetry_mgr, 'active_ticker', 'RELI_NSE')])[0]
                 
-                output = "VORTEX Engine Standby"
+                output = "ORION Engine Standby"
                 if telemetry_mgr and hasattr(telemetry_mgr, 'vortex_agent'):
                     quote = telemetry_mgr.books.get(active_t, {})
                     mid = quote.get('price', 0.0) if isinstance(quote, dict) else 0.0
@@ -1249,7 +1249,7 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 self.wfile.write(json.dumps(fx_data).encode('utf-8'))
                 return
 
-            # 6. Yahoo Search API
+            # 6. Global & Indian Ticker Search API
             if self.path.startswith('/api/search'):
                 from urllib.parse import urlparse, parse_qs
                 import urllib.parse
@@ -1289,7 +1289,7 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                                                 'name': f"{name} ({exch})"
                                             })
                         except Exception as e:
-                            print(f"[Search API] Error searching Yahoo for '{q_str}': {e}")
+                            pass
 
                     # Also search Alpha Vantage for global / US equities if query is short
                     if len(clean_q) <= 8:
@@ -1306,13 +1306,66 @@ def start_http_server(port, web_dir, telemetry_mgr=None):
                 self.end_headers()
                 self.wfile.write(json.dumps(results).encode('utf-8'))
                 return
+
+            # 7. Unified Next.js Static Frontend Serving (Single-Port Hosting)
+            import mimetypes
+            static_dir = 'out' if os.path.exists('out') else 'web'
+            raw_path = self.path.split('?')[0].lstrip('/')
             
+            # Map routes: '' -> index.html, 'terminal' -> terminal.html
+            target_file = None
+            if not raw_path:
+                target_file = os.path.join(static_dir, 'index.html')
+            else:
+                direct_path = os.path.join(static_dir, raw_path)
+                html_path = os.path.join(static_dir, f"{raw_path}.html")
+                nested_index = os.path.join(static_dir, raw_path, 'index.html')
+                
+                if os.path.isfile(direct_path):
+                    target_file = direct_path
+                elif os.path.isfile(html_path):
+                    target_file = html_path
+                elif os.path.isfile(nested_index):
+                    target_file = nested_index
+                elif os.path.isfile(os.path.join(static_dir, 'index.html')):
+                    # SPA Fallback for client-side routing
+                    target_file = os.path.join(static_dir, 'index.html')
+
+            if target_file and os.path.isfile(target_file):
+                mime, _ = mimetypes.guess_type(target_file)
+                if not mime:
+                    if target_file.endswith('.js'):
+                        mime = 'application/javascript; charset=utf-8'
+                    elif target_file.endswith('.css'):
+                        mime = 'text/css; charset=utf-8'
+                    elif target_file.endswith('.html'):
+                        mime = 'text/html; charset=utf-8'
+                    elif target_file.endswith('.json'):
+                        mime = 'application/json; charset=utf-8'
+                    else:
+                        mime = 'application/octet-stream'
+                elif mime.startswith('text/') or mime == 'application/javascript':
+                    mime += '; charset=utf-8'
+
+                try:
+                    with open(target_file, 'rb') as f:
+                        content = f.read()
+                    self.send_response(200)
+                    self.send_header('Content-Type', mime)
+                    self.send_header('Content-Length', str(len(content)))
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(content)
+                    return
+                except Exception as e:
+                    pass
+
             # Fallback 404
             self.send_response(404)
-            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps({'error': 'Endpoint not found'}).encode('utf-8'))
+            self.wfile.write(b"<h1>404 - Page Not Found</h1>")
 
     class SilentTCPServer(socketserver.TCPServer):
         def handle_error(self, request, client_address):

@@ -14,7 +14,7 @@ export default function NewsPage() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_VORTEX_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_ORION_API_URL || '';
     fetch(`${apiUrl}/api/news`)
       .then((r) => r.json())
       .then((d) => setNews(Array.isArray(d) ? d : d.news ?? []))
