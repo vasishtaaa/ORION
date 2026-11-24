@@ -5,7 +5,7 @@ import { exportCandlesToCSV, exportSnapshotToJSON, triggerPrintSummaryReport } f
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
-import { Download, FileSpreadsheet, FileJson, Printer, Share2 } from 'lucide-react';
+import { FileSpreadsheet, FileJson, Printer, Share2 } from 'lucide-react';
 
 interface ExportToolbarProps {
   snapshot: VortexSnapshot;

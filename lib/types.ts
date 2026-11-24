@@ -96,14 +96,6 @@ export interface VortexSnapshot {
   fx_rates?: FxRate[];
 }
 
-export interface PresetBasket {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  tickers: string[];
-}
-
 export interface QuantParameters {
   rsiPeriod: number;
   rsiOversold: number;

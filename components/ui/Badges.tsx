@@ -39,13 +39,13 @@ export function StatusBadge({ status }: { status: 'connecting' | 'connected' | '
   const config = {
     connected: { bg: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]', text: 'text-emerald-400', label: 'STREAM ACTIVE' },
     connecting: { bg: 'bg-amber-400 animate-ping', text: 'text-amber-300', label: 'CONNECTING' },
-    disconnected: { bg: 'bg-emerald-500/80', text: 'text-emerald-400', label: 'STREAM ACTIVE' },
+    disconnected: { bg: 'bg-amber-400', text: 'text-amber-300', label: 'DEMO MODE' },
   }[status] || { bg: 'bg-emerald-500', text: 'text-emerald-400', label: 'STREAM ACTIVE' };
 
   return (
-    <div className="w-fit inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap px-3.5 py-1 text-xs font-medium rounded-full bg-[#0e131d]/90 border border-white/10 shadow-sm">
+    <div className="hidden md:inline-flex w-fit shrink-0 items-center justify-center gap-2 whitespace-nowrap px-2.5 lg:px-3.5 py-1 text-xs font-medium rounded-full bg-[#0e131d]/90 border border-white/10 shadow-sm" aria-label={config.label}>
       <span className={clsx('w-2 h-2 rounded-full shrink-0', config.bg)} />
-      <span className={clsx('font-mono tracking-wider uppercase text-[11px]', config.text)}>{config.label}</span>
+      <span className={clsx('hidden lg:inline font-mono tracking-wider uppercase text-[11px]', config.text)}>{config.label}</span>
     </div>
   );
 }

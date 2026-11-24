@@ -29,7 +29,7 @@ export default function ImbalanceVisualizer({ imbalance = 0.5, active = true }: 
     if (!ctx) return;
 
     let animationFrameId: number;
-    let particles: Particle[] = [];
+    const particles: Particle[] = [];
     const maxParticles = 80;
 
     // Handle canvas sizing

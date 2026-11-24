@@ -8,7 +8,7 @@ interface OrderBookDepthProps {
   midPrice: number;
 }
 
-export default function OrderBookDepth({ bids = [], asks = [], midPrice = 0 }: OrderBookDepthProps) {
+export default function OrderBookDepth({ bids = [], asks = [] }: OrderBookDepthProps) {
   const maxBidVol = Math.max(...bids.map(([, v]) => v), 1);
   const maxAskVol = Math.max(...asks.map(([, v]) => v), 1);
   const maxTotalVol = Math.max(maxBidVol, maxAskVol);

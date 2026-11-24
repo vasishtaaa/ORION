@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Activity, ShieldCheck } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 export function Preloader() {
   const [visible, setVisible] = useState(true);

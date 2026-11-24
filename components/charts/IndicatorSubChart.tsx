@@ -1,14 +1,13 @@
 'use client';
 import React, { useMemo } from 'react';
 import { Candle } from '@/lib/types';
-import { GlassCard } from '@/components/ui/GlassCard';
 
 interface IndicatorSubChartProps {
   candles: Candle[];
   type?: 'RSI' | 'MACD';
 }
 
-export default function IndicatorSubChart({ candles = [], type = 'RSI' }: IndicatorSubChartProps) {
+export default function IndicatorSubChart({ candles = [] }: IndicatorSubChartProps) {
   // Simple rolling RSI calculation for visualization
   const rsiValues = useMemo(() => {
     if (!candles || candles.length < 5) return [50];

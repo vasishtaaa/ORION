@@ -11,6 +11,7 @@ void main() {
 
 const FRAG = `
 uniform float uTime;
+uniform float uScroll;
 uniform vec2 uResolution;
 varying vec2 vUv;
 
@@ -34,7 +35,7 @@ float noise(vec2 p) {
 float fbm(vec2 p) {
   float v = 0.0;
   float a = 0.5;
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 5; i++) {
     v += a * noise(p);
     p = p * 2.1 + vec2(1.7, 9.2);
     a *= 0.5;
@@ -43,8 +44,8 @@ float fbm(vec2 p) {
 }
 
 void main() {
-  vec2 p = vUv;
-  float t = uTime * 0.12;
+  vec2 p = vUv + vec2(0.0, uScroll * 0.00025);
+  float t = uTime * 0.10 + (uScroll * 0.0001);
 
   vec2 q = vec2(fbm(p + vec2(0.0, 0.0) + t), fbm(p + vec2(5.2, 1.3) + t * 0.7));
   vec2 r = vec2(fbm(p + 4.0 * q + vec2(1.7, 9.2) + t * 0.5), fbm(p + 4.0 * q + vec2(8.3, 2.8) + t * 0.3));
@@ -70,6 +71,7 @@ export default function LiquidBackground() {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -82,12 +84,13 @@ export default function LiquidBackground() {
     }
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     container.appendChild(renderer.domElement);
 
     const geometry = new THREE.PlaneGeometry(2, 2);
     const uniforms = {
       uTime: { value: 0 },
+      uScroll: { value: 0 },
       uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
     };
 
@@ -101,11 +104,16 @@ export default function LiquidBackground() {
     scene.add(mesh);
 
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
+    let targetScroll = 0;
+    let currentScroll = 0;
 
+    let documentVisible = !document.hidden;
     const animate = () => {
+      currentScroll += (targetScroll - currentScroll) * 0.08;
+      uniforms.uScroll.value = currentScroll;
       uniforms.uTime.value = clock.getElapsedTime();
-      if (renderer) {
+      if (renderer && documentVisible) {
         renderer.render(scene, camera);
       }
       animationFrameId = requestAnimationFrame(animate);
@@ -119,10 +127,19 @@ export default function LiquidBackground() {
       uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
     };
 
+    const handleScroll = () => {
+      targetScroll = window.scrollY;
+    };
+    const handleVisibility = () => { documentVisible = !document.hidden; };
+
     window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('visibilitychange', handleVisibility);
       cancelAnimationFrame(animationFrameId);
       if (renderer && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);

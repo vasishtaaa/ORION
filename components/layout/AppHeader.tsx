@@ -3,10 +3,31 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StatusBadge } from '@/components/ui/Badges';
-import { DrawerMenu } from './DrawerMenu';
 import { useToast } from '@/components/ui/Toast';
-import { Search, Menu, Volume2, VolumeX } from 'lucide-react';
-import { toggleAudio, isAudioEnabled } from '@/lib/audio';
+import {
+  Search, Volume2, VolumeX, BarChart2, Activity, Brain, Newspaper, Cpu,
+  HelpCircle, ChevronDown, Compass, TrendingUp, Calendar, Clock, Star, LayoutDashboard, Radio
+} from 'lucide-react';
+import { toggleAudio, isAudioEnabled, audio } from '@/lib/audio';
+import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal';
+import { NotificationCenter } from '@/components/ui/NotificationCenter';
+
+const PRIMARY_LINKS = [
+  { label: 'Terminal', href: '/terminal', icon: BarChart2 },
+  { label: 'Screener', href: '/screener', icon: Activity },
+  { label: 'Analyst', href: '/analyst', icon: Brain },
+  { label: 'News', href: '/news', icon: Newspaper },
+  { label: 'Telemetry', href: '/telemetry', icon: Cpu },
+];
+
+const MARKET_LINKS = [
+  { label: 'Overview Dashboard', href: '/dashboard', icon: LayoutDashboard, desc: 'Macro market snapshot' },
+  { label: 'Market Movers', href: '/movers', icon: TrendingUp, desc: 'Gainers, losers & volume surges' },
+  { label: 'Sector Analysis', href: '/sectors', icon: Compass, desc: 'Industry rotation & heatmap' },
+  { label: 'Corporate Earnings', href: '/earnings', icon: Calendar, desc: 'Quarterly financial reports' },
+  { label: 'Economic Events', href: '/economic-events', icon: Clock, desc: 'RBI & macro calendar' },
+  { label: 'My Watchlist', href: '/watchlist', icon: Star, desc: 'Custom monitored portfolios' },
+];
 
 interface AppHeaderProps {
   wsStatus: 'connecting' | 'connected' | 'disconnected';
@@ -17,33 +38,46 @@ interface AppHeaderProps {
 
 export default function AppHeader({
   wsStatus,
-  activeTicker = 'TCS_NSE',
   currentPath = '/',
   onTickerSelect,
 }: AppHeaderProps) {
   const router = useRouter();
   const { info, success } = useToast();
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [marketsMenuOpen, setMarketsMenuOpen] = useState(false);
   const [audioActive, setAudioActive] = useState(false);
+  const [pulseActive, setPulseActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     setAudioActive(isAudioEnabled());
+    setPulseActive(audio.isPulseRunning());
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setSearchOpen((prev) => !prev);
+      } else if (e.key === '?' && !searchOpen) {
+        const target = e.target as HTMLElement;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+        e.preventDefault();
+        setShortcutsOpen((prev) => !prev);
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [searchOpen]);
 
   const handleAudioToggle = () => {
     const next = toggleAudio();
     setAudioActive(next);
-    info(next ? 'Acoustic Telemetry Activated' : 'Acoustic Telemetry Muted');
+    info(next ? 'Acoustic Audio Active' : 'Acoustic Audio Muted');
+  };
+
+  const handlePulseToggle = () => {
+    const next = audio.togglePulse();
+    setPulseActive(next);
+    info(next ? 'Market Sonification Pulse Activated' : 'Market Pulse Deactivated');
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -67,32 +101,102 @@ export default function AppHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-16 w-full flex-shrink-0 bg-[#080b11]/90 border-b border-white/10 backdrop-blur-md flex items-center justify-center">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-          {/* Left: ORION Logo with O Monogram & 4.0 Badge */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3 no-underline group shrink-0">
+      <header className="sticky top-0 z-40 h-16 w-full flex-shrink-0 bg-[#080b11]/95 border-b border-white/10 backdrop-blur-md flex items-center justify-center">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
+          {/* Left: ORION Logo */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href="/" className="flex items-center gap-2.5 no-underline group shrink-0">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#00ff87] to-[#006b3a] flex items-center justify-center font-black text-black text-sm sm:text-base shadow-[0_0_20px_rgba(0,255,135,0.4)] group-hover:scale-105 transition-transform">
                 O
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-sans font-black text-base sm:text-lg tracking-[2.5px] sm:tracking-[3px] uppercase text-white group-hover:text-[#00ff87] transition-colors">
+              <div className="hidden sm:flex items-center gap-1.5">
+                <span className="font-sans font-black text-base sm:text-lg tracking-[2px] uppercase text-white group-hover:text-[#00ff87] transition-colors">
                   ORION
                 </span>
-                <span className="w-fit max-w-full inline-flex shrink-0 items-center justify-center px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <span className="w-fit inline-flex shrink-0 items-center justify-center px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                   4.0
                 </span>
               </div>
             </Link>
           </div>
 
-          {/* Right: Search Input (⌘K), Audio, Stream Status & Hamburger Menu Button */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          {/* Center: Inline Navigation Tabs & Markets Mega-Menu */}
+          <nav className="hidden lg:flex items-center gap-1 sm:gap-2">
+            {PRIMARY_LINKS.map(({ label, href, icon: Icon }) => {
+              const isActive = currentPath === href || (href !== '/' && currentPath?.startsWith(href));
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all group ${
+                    isActive
+                      ? 'text-[#00ff87] bg-[#00ff87]/10 shadow-[0_0_15px_rgba(0,255,135,0.15)] border border-[#00ff87]/20'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5 border border-transparent'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#00ff87]' : 'text-[var(--text-muted)] group-hover:text-white'}`} />
+                  <span>{label}</span>
+                  {isActive && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-[#00ff87] rounded-full shadow-[0_0_8px_#00ff87]" />
+                  )}
+                </Link>
+              );
+            })}
+
+            {/* Markets Mega-Menu Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setMarketsMenuOpen(!marketsMenuOpen)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
+                  marketsMenuOpen
+                    ? 'text-white bg-white/10'
+                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span>Markets</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${marketsMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {marketsMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setMarketsMenuOpen(false)} />
+                  <div className="absolute top-full left-0 mt-2 z-40 w-72 rounded-2xl bg-[#0a0d14] border border-white/15 p-2 shadow-2xl backdrop-blur-2xl grid grid-cols-1 gap-1">
+                    {MARKET_LINKS.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMarketsMenuOpen(false)}
+                          className="flex items-start gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors group"
+                        >
+                          <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 group-hover:text-[#50C878] group-hover:border-[#50C878]/30 transition-colors shrink-0">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-mono text-xs font-bold text-white group-hover:text-[#50C878] transition-colors">
+                              {item.label}
+                            </div>
+                            <div className="text-[10px] text-slate-400 leading-tight">
+                              {item.desc}
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </nav>
+
+          {/* Right: Search, Audio, Pulse, Alerts, Hotkeys, Status */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Search Input Trigger */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden sm:inline-flex items-center justify-between gap-3 px-3.5 py-1.5 rounded-full bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group w-fit"
+              className="hidden sm:inline-flex items-center justify-between gap-3 px-3 py-1.5 rounded-full bg-[#0e131d]/90 border border-white/10 hover:border-[#50C878] text-xs font-mono text-[var(--text-muted)] transition-all cursor-pointer shadow-sm group w-fit"
             >
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-[var(--matrix)] group-hover:text-[#00ff87]" />
@@ -103,14 +207,18 @@ export default function AppHeader({
               </kbd>
             </button>
 
-            {/* Search Icon button (Mobile only) */}
+            {/* Pulse Sonification Toggle */}
             <button
               type="button"
-              onClick={() => setSearchOpen(true)}
-              className="sm:hidden p-2 rounded-full bg-[#0e131d] border border-white/10 text-[var(--text-secondary)] hover:text-white cursor-pointer"
-              title="Search ticker"
+              onClick={handlePulseToggle}
+              className={`p-2 rounded-full border transition-all cursor-pointer hidden md:inline-flex ${
+                pulseActive
+                  ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.3)] animate-pulse'
+                  : 'bg-[#0e131d] text-slate-400 border-white/10 hover:text-white'
+              }`}
+              title={pulseActive ? 'Stop Market Pulse Sonification' : 'Start Acoustic Market Pulse'}
             >
-              <Search className="w-4 h-4" />
+              <Radio className="w-4 h-4" />
             </button>
 
             {/* Audio Telemetry Toggle */}
@@ -127,21 +235,21 @@ export default function AppHeader({
               {audioActive ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
 
-            {/* Status Pill Badge */}
-            <StatusBadge status={wsStatus} />
+            {/* Global Notification Center */}
+            <NotificationCenter />
 
-            {/* Sliding Drawer Hamburger Toggle Button */}
+            {/* Keyboard Shortcuts Trigger */}
             <button
               type="button"
-              onClick={() => setDrawerOpen(true)}
-              className="p-2 sm:px-3.5 sm:py-1.5 rounded-full bg-[#0e131d] hover:bg-[#141b29] border border-white/10 hover:border-[#50C878] text-[var(--text-primary)] hover:text-[#00ff87] transition-all cursor-pointer inline-flex items-center gap-2 shadow-sm w-fit"
-              aria-label="Open Navigation Menu"
+              onClick={() => setShortcutsOpen(true)}
+              className="p-2 rounded-full bg-[#0e131d] border border-white/10 text-slate-400 hover:text-[#50C878] hover:border-[#50C878]/30 transition-all cursor-pointer hidden sm:inline-flex"
+              title="Keyboard shortcuts (?)"
             >
-              <Menu className="w-4 h-4 sm:w-4 sm:h-4 text-[#00ff87]" />
-              <span className="hidden sm:inline font-mono font-bold text-xs tracking-wider uppercase">
-                Menu
-              </span>
+              <HelpCircle className="w-4 h-4" />
             </button>
+
+            {/* Status Pill Badge */}
+            <StatusBadge status={wsStatus} />
           </div>
         </div>
       </header>
@@ -191,13 +299,10 @@ export default function AppHeader({
         </div>
       )}
 
-      {/* Sliding Slide-over Navigation Drawer */}
-      <DrawerMenu
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        currentPath={currentPath}
-        activeTicker={activeTicker}
-        onTickerSelect={onTickerSelect}
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
       />
     </>
   );

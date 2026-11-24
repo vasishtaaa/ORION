@@ -1,0 +1,12 @@
+# ORION Financial Intelligence Platform — robots.txt
+# https://orion.trade
+
+User-agent: *
+Allow: /
+
+# Disallow internal/data endpoints
+Disallow: /api/
+Disallow: /_next/
+
+# Sitemap location
+Sitemap: https://orion.trade/sitemap.xml

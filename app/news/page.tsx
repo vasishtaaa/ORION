@@ -5,7 +5,7 @@ import { useVortexSocket } from '@/lib/websocket';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { NewsItem } from '@/lib/types';
-import { ExternalLink, Globe2, Radio, TrendingUp, TrendingDown } from 'lucide-react';
+import { ExternalLink, Globe2, Radio, TrendingUp, TrendingDown, Search } from 'lucide-react';
 
 export default function NewsPage() {
   const { status, snapshot, activeTicker, selectTicker } = useVortexSocket();
@@ -41,9 +41,10 @@ export default function NewsPage() {
 
   const bullishCount = news.filter((n) => (n.sentiment || 0) > 0.1).length;
   const bearishCount = news.filter((n) => (n.sentiment || 0) < -0.1).length;
+  const publisherCount = new Set(news.map((n) => n.source)).size;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080b11] text-white w-full overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-transparent text-white w-full overflow-x-hidden">
       <AppHeader
         wsStatus={status}
         activeTicker={activeTicker}
@@ -51,30 +52,30 @@ export default function NewsPage() {
         onTickerSelect={(t) => selectTicker(t)}
       />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+      <main className="flex-1 w-full px-6 sm:px-8 lg:px-12 py-8 flex flex-col gap-6">
         {/* Header & KPI Summary Grid */}
         <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
           <MetricCard
             title="TOTAL FEEDS"
-            value={news.length || 81}
+            value={news.length > 0 ? news.length : '—'}
             subValue="Live Wire"
             icon={<Radio className="w-4 h-4" />}
           />
           <MetricCard
             title="BULLISH TONE"
-            value={bullishCount || 48}
+            value={news.length > 0 ? bullishCount : '—'}
             subValue="Headlines"
             icon={<TrendingUp className="w-4 h-4 text-[#00ff87]" />}
           />
           <MetricCard
             title="BEARISH TONE"
-            value={bearishCount || 14}
+            value={news.length > 0 ? bearishCount : '—'}
             subValue="Headlines"
             icon={<TrendingDown className="w-4 h-4 text-red-400" />}
           />
           <MetricCard
             title="PUBLISHERS"
-            value="12"
+            value={news.length > 0 ? publisherCount : '—'}
             subValue="Wire Outlets"
             icon={<Globe2 className="w-4 h-4" />}
           />
@@ -91,15 +92,27 @@ export default function NewsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Search bar */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search headlines..."
+                className="pl-9 pr-4 py-2 rounded-full bg-[#0a0d14] border border-white/10 text-xs font-mono text-white placeholder-[var(--text-muted)] focus:outline-none focus:border-[#00ff87] transition-colors w-48"
+              />
+            </div>
+            {/* Sentiment filters */}
             {['ALL', 'BULLISH', 'BEARISH'].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`w-fit px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer ${
+                className={`px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all cursor-pointer ${
                   filter === f
                     ? 'bg-[#50C878] text-black font-bold shadow-[0_0_12px_rgba(80,200,120,0.4)]'
-                    : 'bg-[#0a0d14] text-[var(--text-secondary)] hover:text-white border border-white/10'
+                    : 'bg-[#0a0d14] text-[var(--text-secondary)] hover:text-white border border-white/10 hover:border-white/25'
                 }`}
               >
                 {f}

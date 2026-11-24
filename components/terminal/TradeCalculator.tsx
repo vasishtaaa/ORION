@@ -1,27 +1,47 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { validateTradeForm, calculateTradeMetrics, TradeInputForm } from '@/lib/validation';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
-import { Calculator, ShieldCheck, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { Calculator, TrendingUp, TrendingDown } from 'lucide-react';
 import { clsx } from 'clsx';
+import { usePaperTrading } from '@/lib/usePaperTrading';
 
 interface TradeCalculatorProps {
   currentPrice: number;
   activeTicker: string;
 }
 
-export function TradeCalculator({ currentPrice = 2500, activeTicker = 'TCS_NSE' }: TradeCalculatorProps) {
+export function TradeCalculator({ currentPrice = 2248.40, activeTicker = 'TCS_NSE' }: TradeCalculatorProps) {
   const { success, error } = useToast();
+  const { executeOrder } = usePaperTrading();
+
   const [form, setForm] = useState<TradeInputForm>({
     accountSize: 500000,
     riskPercentage: 1.0,
-    entryPrice: currentPrice || 2500,
-    stopLossPrice: Number(((currentPrice || 2500) * 0.985).toFixed(2)),
-    targetPrice: Number(((currentPrice || 2500) * 1.035).toFixed(2)),
+    entryPrice: currentPrice || 2248.40,
+    stopLossPrice: Number(((currentPrice || 2248.40) * 0.985).toFixed(2)),
+    targetPrice: Number(((currentPrice || 2248.40) * 1.035).toFixed(2)),
   });
 
-  // Sync entry price when ticker / price changes if not dirty
+  const currentPriceRef = useRef(currentPrice);
+  useEffect(() => {
+    currentPriceRef.current = currentPrice;
+  }, [currentPrice]);
+
+  // Sync entry price and targets when active ticker changes
+  useEffect(() => {
+    const price = currentPriceRef.current;
+    if (price > 0) {
+      setForm((prev) => ({
+        ...prev,
+        entryPrice: price,
+        stopLossPrice: Number((price * 0.985).toFixed(2)),
+        targetPrice: Number((price * 1.035).toFixed(2)),
+      }));
+    }
+  }, [activeTicker]);
+
   const validation = useMemo(() => validateTradeForm(form), [form]);
   const metrics = useMemo(() => calculateTradeMetrics(form), [form]);
 
@@ -29,12 +49,27 @@ export function TradeCalculator({ currentPrice = 2500, activeTicker = 'TCS_NSE' 
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSimulateExecution = () => {
-    if (!validation.isValid) {
+  const handleExecutePaperTrade = (side: 'BUY' | 'SELL') => {
+    if (!validation.isValid || !metrics) {
       error('Please fix validation errors before executing trade ticket');
       return;
     }
-    success(`Simulated order execution of ${metrics?.shares} shares for ${activeTicker}!`);
+
+    const res = executeOrder({
+      ticker: activeTicker,
+      side,
+      shares: metrics.shares,
+      price: form.entryPrice,
+      type: 'MARKET',
+      stopLoss: form.stopLossPrice,
+      target: form.targetPrice,
+    });
+
+    if (res.success) {
+      success(res.message);
+    } else {
+      error(res.message);
+    }
   };
 
   return (
@@ -122,18 +157,20 @@ export function TradeCalculator({ currentPrice = 2500, activeTicker = 'TCS_NSE' 
         </div>
       </div>
 
-      {/* Calculated Output Summary */}
+      {/* Calculated Output Summary & Execution Buttons */}
       {metrics && (
         <div className="p-4 rounded-xl bg-[#00140a]/90 border border-[rgba(80,200,120,0.18)] flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4 sm:gap-6 font-mono text-xs flex-wrap">
             <div>
-              <span className="text-[var(--text-muted)] block text-[10px]">POSITION SIZE</span>
+              <span className="text-[var(--text-muted)] block text-[10px]">CALCULATED SHARES</span>
               <span className="text-white font-bold text-sm">{metrics.shares} Shares</span>
               <span className="text-[10px] text-[var(--text-muted)] block">₹{metrics.totalCost.toLocaleString()}</span>
             </div>
             <div>
               <span className="text-[var(--text-muted)] block text-[10px]">RISK : REWARD</span>
-              <span className={clsx('font-bold text-sm', metrics.riskRewardRatio >= 2 ? 'text-[#00ff87]' : 'text-amber-400')}>
+              <span
+                className={clsx('font-bold text-sm', metrics.riskRewardRatio >= 2 ? 'text-[#00ff87]' : 'text-amber-400')}
+              >
                 1 : {metrics.riskRewardRatio}
               </span>
             </div>
@@ -147,14 +184,24 @@ export function TradeCalculator({ currentPrice = 2500, activeTicker = 'TCS_NSE' 
             </div>
           </div>
 
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleSimulateExecution}
-            leftIcon={<ShieldCheck className="w-3.5 h-3.5" />}
-          >
-            Simulate Execution Ticket
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleExecutePaperTrade('BUY')}
+              leftIcon={<TrendingUp className="w-3.5 h-3.5" />}
+            >
+              Paper BUY
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => handleExecutePaperTrade('SELL')}
+              leftIcon={<TrendingDown className="w-3.5 h-3.5" />}
+            >
+              Paper SELL
+            </Button>
+          </div>
         </div>
       )}
     </div>

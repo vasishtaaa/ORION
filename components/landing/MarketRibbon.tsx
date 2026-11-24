@@ -4,14 +4,16 @@ import React from 'react';
 const TICKERS = [
   { symbol: 'NIFTY 50', price: '24,850.15', change: '+0.45%', up: true },
   { symbol: 'SENSEX', price: '81,320.60', change: '+0.38%', up: true },
-  { symbol: 'TCS', price: '₹3,952.11', change: '+1.05%', up: true },
-  { symbol: 'HDFC BANK', price: '₹1,653.80', change: '+0.74%', up: true },
-  { symbol: 'RELIANCE', price: '₹2,980.50', change: '+1.20%', up: true },
-  { symbol: 'INFOSYS', price: '₹1,788.40', change: '+0.88%', up: true },
-  { symbol: 'ICICI BANK', price: '₹1,198.20', change: '+0.62%', up: true },
-  { symbol: 'SBIN', price: '₹815.30', change: '+1.12%', up: true },
-  { symbol: 'TATA MOTORS', price: '₹972.40', change: '+1.45%', up: true },
-  { symbol: 'ADANI ENT', price: '₹3,145.00', change: '+2.10%', up: true },
+  { symbol: 'TCS', price: '₹2,253.60', change: '-0.72%', up: false },
+  { symbol: 'RELIANCE', price: '₹1,288.50', change: '-0.73%', up: false },
+  { symbol: 'HDFC BANK', price: '₹711.00', change: '-2.23%', up: false },
+  { symbol: 'INFOSYS', price: '₹1,110.80', change: '-0.82%', up: false },
+  { symbol: 'ICICI BANK', price: '₹1,443.00', change: '+0.91%', up: true },
+  { symbol: 'SBIN', price: '₹1,042.90', change: '-0.86%', up: false },
+  { symbol: 'BHARTI AIRTEL', price: '₹1,878.30', change: '-1.25%', up: false },
+  { symbol: 'L&T', price: '₹4,027.00', change: '-0.27%', up: false },
+  { symbol: 'MARUTI', price: '₹13,440.00', change: '-0.59%', up: false },
+  { symbol: 'TITAN', price: '₹5,139.30', change: '+0.77%', up: true },
 ];
 
 export function MarketRibbon() {

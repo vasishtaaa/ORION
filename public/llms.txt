@@ -1,0 +1,44 @@
+# ORION Financial Intelligence Platform
+
+> ORION is an institutional-grade financial market intelligence platform providing high-frequency market telemetry, AI-powered quantitative analysis, real-time stock screening, and live financial news for Indian equity markets (NSE & BSE).
+
+## Platform Description
+
+ORION is a self-hosted financial intelligence platform built around a Python-based high-frequency telemetry engine. It connects to live NSE and BSE market data feeds and uses Google Gemini AI for quantitative signal generation and trade rationale.
+
+The platform operates via a WebSocket binary protocol (RFC 6455) to deliver sub-millisecond market data to connected clients, including:
+- Real-time candlestick charts with VWAP/SMA overlays
+- Level 2 order book depth (bids/asks)
+- AI-generated trade signals (BUY/SELL/HOLD) with confidence scores
+- Multi-factor technical screening across 40+ NSE/BSE instruments
+- Alpha Vantage market movers (top gainers, losers, most active)
+- Live financial news aggregated from Reuters, Bloomberg, Economic Times, Mint, Moneycontrol
+- Real-time FX rates (USD/INR, EUR/INR, GBP/INR)
+
+## Platform Modules
+
+- **Dashboard** (`/dashboard`): Central market command center with index overview, sector heatmap, movers summary, and AI signals.
+- **Live Terminal** (`/terminal`): HFT order flow terminal with candlestick charts, L2 order book, and AI signal generation.
+- **Stock Screener** (`/screener`): Multi-factor technical screening with RSI, quant score, market cap, P/E, EPS, sector filters.
+- **Market Overview** (`/markets`): Global and Indian market status, indices, breadth, advance/decline.
+- **Market Movers** (`/movers`): Top gainers, losers, and most actively traded instruments.
+- **Sector Performance** (`/sectors`): NSE sector breakdown with heatmap and top performers.
+- **Stocks Hub** (`/stocks`): Gateway to individual stock analysis and comparison.
+- **Watchlist** (`/watchlist`): Personalized watchlist with price alerts and signal tracking.
+- **Financial News** (`/news`): Live news wire with sentiment analysis, source attribution, and filters.
+- **Earnings Calendar** (`/earnings`): Upcoming earnings events and historical results.
+- **Economic Events** (`/economic-events`): RBI, GDP, CPI, Fed, and global macro events calendar.
+- **AI Analyst** (`/analyst`): Gemini-powered quantitative analysis with trade rationale and risk sizing.
+- **Telemetry** (`/telemetry`): Engine health metrics, WebSocket latency histogram, throughput.
+
+## Data Sources
+
+- NSE/BSE exchange tick feeds (live)
+- Alpha Vantage (market movers, FX rates, fundamentals)
+- Google Finance (supplementary price data)
+- Google Gemini AI (trade signal reasoning)
+- Financial news aggregation (Reuters, Bloomberg, Economic Times, Mint, Moneycontrol)
+
+## Important Notice
+
+Data on ORION may be delayed by up to 15 minutes. ORION is not a licensed financial advisor. All content is for informational and educational purposes only. Nothing on this platform constitutes financial advice. Always consult a qualified financial advisor before making investment decisions.
